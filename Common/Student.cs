@@ -1166,4 +1166,18 @@ public partial class Student
 
     [GeneratedRegex(@"\d{1,6}")]
     private static partial Regex MyRegex();
+
+    internal void GetEntlassdatum(List<dynamic> schuelerZusatzdaten)
+    {
+        Entlassdatum = schuelerZusatzdaten
+            .Where(rec =>
+            {
+                var dict = (IDictionary<string, object>)rec;
+                return dict["Nachname"].ToString() == Nachname &&
+                    dict["Vorname"].ToString() == Vorname &&
+                    dict["Geburtsdatum"].ToString() == Geburtsdatum;
+            })
+            .Select(rec => ((IDictionary<string, object>)rec)["Entlassdatum"]?.ToString())
+            .LastOrDefault() ?? string.Empty;
+    }
 }

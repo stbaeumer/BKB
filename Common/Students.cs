@@ -23,12 +23,31 @@ public class Students : List<Student>
 
     public Students(Dateien quelldateien)
     {
+        foreach(var datei in quelldateien)
+        {
+            if (!string.IsNullOrEmpty(datei.Fehlermeldung))
+            {
+                Console.WriteLine("");
+                Global.ZeileSchreiben(datei.Fehlermeldung, "Hinweise:", ConsoleColor.Black, ConsoleColor.Red);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Global.DisplayCenteredBox(datei.Hinweise.ToList(), 97);
+                Console.ReadKey();
+                return;
+            }
+        }
+        
+
         var schildschuelerexport = quelldateien
         .Where(x => x?.AbsoluterPfad?.Contains("SchildSchuelerExport") == true)
         .OrderByDescending(x => x?.AbsoluterPfad != null ? File.GetCreationTime(x.AbsoluterPfad) : DateTime.MinValue)
         .FirstOrDefault();
 
-        if (schildschuelerexport == null) return;
+        if (schildschuelerexport == null)
+        {
+            Global.ZeileSchreiben("Keine Schüler*innen gefunden", "", ConsoleColor.Red, ConsoleColor.Black);
+
+            return;
+        } 
         
         foreach (var rec in schildschuelerexport)
         {

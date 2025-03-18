@@ -112,8 +112,8 @@ public class Menue : List<Menüeintrag>
                                 if(this[AusgewaehlterMenueEintrag - 1].Quelldateien.Any(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
                                 {
                                     Console.ForegroundColor = ConsoleColor.Red;
-                                    Global.ZeileSchreiben("Der Menüeintrag kann nicht gewählt werden:", "Hinweise beachten:", ConsoleColor.Black, ConsoleColor.Red);
-                                    Console.WriteLine("");
+                                    //Global.ZeileSchreiben("Der Menüeintrag kann nicht gewählt werden:", "Hinweise beachten:", ConsoleColor.Black, ConsoleColor.Red);
+                                    //Console.WriteLine("");
                                     Console.ForegroundColor = ConsoleColor.Red;
                                     
                                     

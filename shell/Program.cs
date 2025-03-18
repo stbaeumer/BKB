@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 
 try
 {
-    Global.PfadSchilddateien = @"\\fs01\Schild-NRW\Datenaustausch\";
+    Global.PfadSchilddateien = @"\\fs01\SchILD-NRW\Datenaustausch\";
     Console.Clear();
 
     // Nur für Windows:
@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 17.03.2025";
+Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 18.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();
@@ -50,8 +50,7 @@ var bkbJsonPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFold
 do
 {
     Global.DisplayHeader(Global.Header.H1, Global.H1, Global.Protokollieren.Nein);    
-    var configuration = new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(bkbJsonPath)).AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true).Build();       
-    
+        
     if(!File.Exists(bkbJsonPath))
     {     
         var bkbJsonContent = new
@@ -100,10 +99,11 @@ do
             NetmanMailReceiver = "stefan.baeumer@berufskolleg-borken.de"
         };
         var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });        
-        File.WriteAllText(bkbJsonPath, json);                
-        Global.EinstellungenDurchlaufen(configuration);
+        File.WriteAllText(bkbJsonPath, json);                        
+        Global.EinstellungenDurchlaufen(new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(bkbJsonPath)).AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true).Build());
     }
 
+    var configuration = new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(bkbJsonPath)).AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true).Build();
     // Dynamisch alle Werte aus der Konfiguration den globalen Variablen zuweisen
     foreach (var property in typeof(Global).GetProperties())
     {
@@ -173,6 +173,7 @@ do
     Global.ZeileSchreiben("Dateien einlesen", Global.PfadExportdateien, ConsoleColor.Black, ConsoleColor.Magenta);
     dateien.GetZeilen();        
     var menue = MenueHelper.Einlesen(dateien, klassen, lehrers, configuration, anrechnungen, raums);
+    if (menue == null) continue;
     menue.AuswahlKonsole(configuration);
     Global.WeiterMitAnykey(configuration);
 

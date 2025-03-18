@@ -36,7 +36,15 @@ public class Dateien : List<Datei>
         Add(new Datei(
             "SchildSchuelerExport",
             "Beschreibung",
-            schildhinweise,
+            [
+                "Exportieren Sie die Datei aus SchILD, indem Sie den Pfad gehen:",
+                "Datenaustausch > Export in Text-/Exceldateien > Exportieren",
+                "Die Vorlage 'SchildSchuelerExport' laden.",
+                "Export starten.",
+                "GGfs. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
+                "Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status",
+                "Delimiter: '|'; Dateiendung: *.dat"
+            ],
             [""],
             true,
             d => d.FilternSchildSchuelerExport(),
@@ -366,33 +374,6 @@ public class Dateien : List<Datei>
 
         return $"{parentFolder}/{fileName}";
     }
-
-    public Dateien Benötigte(List<string> dateinamen)
-    {
-        var dateien = new Dateien();
-
-        foreach (var dateiname in dateinamen)
-        {
-            var vorhanden = false;
-
-            foreach (var datei in this.Where(datei =>
-                         !string.IsNullOrEmpty(datei.UnterordnerUndDateiname) &&
-                         datei.UnterordnerUndDateiname.Contains(dateiname)))
-            {
-                dateien.Add(datei);
-                vorhanden = true;
-                datei.Vorhanden = vorhanden;
-                break;
-            }
-
-            if (!vorhanden)
-            {
-                dateien.Add(new Datei(dateiname, false));
-            }
-        }
-
-        return dateien;
-    }
     
     public Dateien Notwendige(List<string> dateinamenNotwendigeDateien)
     {
@@ -419,7 +400,7 @@ public class Dateien : List<Datei>
                 }
                 else
                 {
-                    datei.Fehlermeldung = Global.PfadExportdateien + ": Eine Datei, deren Dateiname mit '" + dateinameNotwendig + "' beginnt, existiert nicht.";                    
+                    datei.Fehlermeldung = Global.PfadExportdateien + ": Die Datei '" + dateinameNotwendig + "' existiert nicht.";                 
                 }
                 notwendige.Add(datei);
             }
@@ -445,7 +426,7 @@ public class Dateien : List<Datei>
         foreach (var datei in this)
         {
             // ... sofern es eine passende Datei gibt ... 
-            if (dateienImPfad.Any(d =>  Path.GetFileName(d).StartsWith(datei.Dateiname)))
+            if (dateienImPfad.Any(d => Path.GetFileName(d).ToLower().StartsWith(datei.Dateiname.ToLower())))            
             {
                 datei.AbsoluterPfad = dateienImPfad.OrderBy(File.GetCreationTime).LastOrDefault(d => Path.GetFileName(d).StartsWith(datei.Dateiname));
                 datei.Erstelldatum = File.GetCreationTime(datei.AbsoluterPfad);
@@ -518,7 +499,10 @@ public class Dateien : List<Datei>
     public List<string> GetDateienImPfad()
     {
         return Directory.GetFiles(Global.PfadExportdateien, "*", SearchOption.AllDirectories)
-            .OrderBy(f => File.GetCreationTime(f)) // Sortierung nach Erstellungsdatum
-            .ToList();
+                .Where(f => f.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(".dat", StringComparison.OrdinalIgnoreCase) ||
+                f.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => File.GetCreationTime(f)) // Sortierung nach Erstellungsdatum
+                .ToList();
     }
 }

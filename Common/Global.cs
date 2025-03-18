@@ -951,12 +951,23 @@ public static string? SmtpUser { get; set; }
            Konfig("PfadSchilddateien", configuration, "Bitte geben Sie den Pfad für die Schilddateien an:", Datentyp.Pfad);
         }
 
-// Hole alle .dat-Dateien aus dem Quellordner
-if (PfadSchilddateien == null) return;
+        // Die SchildSchuelerExport wird immer kopiert.
 
-        var datFiles = Directory.GetFiles(PfadSchilddateien, "*.dat");
+        var datei = Directory.GetFiles(Global.PfadSchilddateien, "*", SearchOption.TopDirectoryOnly).FirstOrDefault(f => Path.GetFileName(f).ToLower().Contains("schildschuelerexport"));
 
-        if (datFiles.Length > 5)
+        if (datei != null)
+        {
+            var destinationPath = Path.Combine(Global.PfadExportdateien, Path.GetFileName(datei));
+            File.Copy(datei, destinationPath, true);
+            Console.WriteLine("Die Datei " + Path.GetFileName(datei) + " wurde erfolgreich nach " + Global.PfadExportdateien + " kopiert.");
+        }
+
+        // Hole alle .dat-Dateien aus dem Quellordner
+        if (PfadSchilddateien == null) return;
+
+        var datFiles = Directory.GetFiles(PfadSchilddateien, "*.dat").ToList();
+
+        if (datFiles.Count > 5)
         {
             // Hole die Erstellungszeiten der Dateien
             var creationTimes = datFiles

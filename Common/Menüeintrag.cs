@@ -1288,7 +1288,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
 
     public Datei? WebuntisOderNetmanCsv(string zieldateiname)
     {
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname);        
         List<dynamic>? webuntisStudents = Quelldateien.GetMatchingList("student_", Students, Klassen);
         if (webuntisStudents == null || webuntisStudents.Count == 0) return [];
         var schuelerZusatzdaten = Quelldateien.GetMatchingList("schuelerzusatzdaten", Students, Klassen);
@@ -1316,8 +1316,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
 
         foreach (var rec in webuntisStudents)
         {
-            var webuntisStudent = rec as IDictionary<string, object>;
-            if (webuntisStudent == null) continue;
+            if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
             var schildStudent = Students.Where(x =>
                     x.Nachname == webuntisStudent["longName"].ToString() && x.Vorname == webuntisStudent["foreName"].ToString() && x.Geburtsdatum == webuntisStudent["birthDate"].ToString())
@@ -1344,14 +1343,11 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
 
             // Wenn der SchildStudent nicht aktiv (2) ist und auch kein Gast (Externer) (6) ist ...
             if (!new List<string>() { "2", "6" }.Contains(schildStudent.Status))
-            {
-                if (schildStudent.Nachname.StartsWith("Frieben"))
-                {
-                    string a = "";
-                }
+            {                
                 // Prüfen, ob ein Austrittsdatum vorhanden ist und ob es in der Vergangenheit liegt
-                string exitDateString = webuntisStudent["exitDate"].ToString();
-                if (!string.IsNullOrEmpty(exitDateString))
+                string exitDateString = webuntisStudent["exitDate"]?.ToString() ?? string.Empty;
+                
+                if (exitDateString != null && !string.IsNullOrEmpty(exitDateString))
                 {
                     DateTime exitDate;
                     bool isValidDate = DateTime.TryParseExact(
@@ -1365,17 +1361,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                     {
                         // Wenn der Schüler in Schild ein Entlassdatum hat, bekommt er das.
 
-                        schildStudent.Entlassdatum = schuelerZusatzdaten
-                            .Where(rec =>
-                            {
-                                var dict = (IDictionary<string, object>)rec;
-                                return dict["Nachname"].ToString() == schildStudent.Nachname &&
-                                    dict["Vorname"].ToString() == schildStudent.Vorname &&
-                                    dict["Geburtsdatum"].ToString() == schildStudent.Geburtsdatum;
-                            })
-                            .Select(rec => ((IDictionary<string, object>)rec)["Entlassdatum"].ToString())
-                            .LastOrDefault();
-
+                        schildStudent.GetEntlassdatum(schuelerZusatzdaten);
 
                         if(!string.IsNullOrEmpty(schildStudent.Entlassdatum))
                         {
@@ -1397,6 +1383,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                 }
             }
         }
+        
         // Ab hier die Neuanlagen
         // Damit Schüler nicht doppelt angelegt werden, wir zuerst
 
@@ -1411,6 +1398,8 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
             // Es kann sein, dass Schüler nach Abschluss als Gast bleiben. 
             // Es wird angenommen, dass der letzte in der Importliste der aktuelle ist.
             var student = Students.LastOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
+
+            if(student == null) continue;
 
             // Wenn der Schüler in Webuntis nicht existiert, ...
             if (!webuntisStudents.Any(rec =>
@@ -1431,15 +1420,16 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
             var sz = schuelerZusatzdaten
                 .Where(rec =>
                 {
+                    if (rec == null) return false;
                     var dict = (IDictionary<string, object>)rec;
-                    return dict["Nachname"].ToString() == student.Nachname &&
+                    return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
                            dict["Vorname"].ToString() == student.Vorname &&
                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
                 }).LastOrDefault() as IDictionary<string, object>;
 
 
             var sb = schuelerBasisdaten
-                .Where(rec =>
+                ?.Where(rec =>
                 {
                     var dict = (IDictionary<string, object>)rec;
                     return dict["Nachname"].ToString() == student.Nachname &&
@@ -1482,6 +1472,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                             var dict = (IDictionary<string, object>)rec;
                             return dict["InternKrz"].ToString() == klasse["Klassenlehrer"].ToString();
                         }).LastOrDefault() as IDictionary<string, object>;
+
                     klassenleitung = dictklassenleitung["Vorname"] + " " + dictklassenleitung["Nachname"];                                    
                 }  
                  
@@ -1652,8 +1643,9 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                            dict["Geburtsdatum"].ToString() == dictBasisdaten["Geburtsdatum"].ToString();
                 }) as IDictionary<string, object>;
 
-            var entlassdatum = DateTime.ParseExact(dictZusatzdaten["Entlassdatum"].ToString(), "dd.MM.yyyy",
-                CultureInfo.InvariantCulture);
+            var entlassdatum = dictZusatzdaten != null && dictZusatzdaten.ContainsKey("Entlassdatum") 
+                ? DateTime.ParseExact(dictZusatzdaten["Entlassdatum"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture) 
+                : DateTime.MinValue;
             int ausbuchenNachWievielTagen;
             if (!int.TryParse(Global.AusbuchenNachWievielTagen, out ausbuchenNachWievielTagen))
             {
@@ -1686,7 +1678,6 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
             // Datei zippen
 
             Global.DatenimportLetztesDatum = DateTime.Now;
-
         }
 
         return zieldatei;
