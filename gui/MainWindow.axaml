@@ -1,0 +1,267 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+mc:Ignorable="d" d:DesignWidth="700" d:DesignHeight="450"
+        x:Class="BKB.MainWindow"
+        Title="BKB"
+        Width="800"
+        Height="700"
+        Background="#364B6D"
+        Focusable="True"> <!-- Hintergrundfarbe angepasst -->
+    <Grid>
+        
+        <!-- Hamburger-Button (Immer sichtbar) -->
+        
+        <Button Name="HamburgerButton"
+                Width="50" Height="50"
+                Background="Transparent"
+                Click="HamburgerButton_Click"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="10"
+                ZIndex="2">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Rectangle Width="30" Height="4" Fill="White" Margin="0,2"/>
+                <Rectangle Width="30" Height="4" Fill="White" Margin="0,2"/>
+                <Rectangle Width="30" Height="4" Fill="White" Margin="0,2"/>
+            </StackPanel>
+        </Button>
+  
+        <!-- SplitView-Menü -->
+        <SplitView Name="MenuSplitView"
+           DisplayMode="Overlay"
+           IsPaneOpen="False"
+           CompactPaneLength="40"
+           OpenPaneLength="550"
+           ZIndex="1">
+    
+            <!-- Sidebar-Bereich -->
+            <SplitView.Pane>
+                <StackPanel Background="Orange">
+
+                    <!--Schuljahr-->
+                    <!-- Schuljahr & Abschnitt Label -->
+                    <StackPanel Orientation="Horizontal" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="Schuljahr" 
+                                   FontSize="16" Foreground="#364B6D" Width="130" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock Text="Abschnitt" 
+                                   FontSize="16" Foreground="#364B6D" Width="130" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <!-- Schuljahr & Abschnitt ComboBoxen -->
+                    <StackPanel Orientation="Horizontal" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center" Spacing="10">
+                        <ComboBox 
+                            Name="cbxAktSj"
+                            Width="130" 
+                            Height="30"
+                            VerticalAlignment="Center"
+                            Background="White"
+                            BorderBrush="White" 
+                            BorderThickness="2"
+                            SelectionChanged="cbxAktSj_SelectionChanged" />
+
+                
+                        <ComboBox 
+                            Name="cbxAbschnitt"
+                            Width="130" 
+                            Height="30"
+                            VerticalAlignment="Center"
+                            Background="White"
+                            BorderBrush="White" 
+                            BorderThickness="2"
+                            SelectionChanged="Abschnitt_SelectionChanged"/>
+                    </StackPanel>
+
+                    <!-- Beschreibung unter beiden ComboBoxen -->
+                    <StackPanel Orientation="Vertical" Margin="10,10,0,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="Geben Sie das Schuljahr und den Abschnitt an, auf die Sie sich hier beziehen." 
+                                   FontSize="12" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <Border Height="1" Background="White" Margin="10,10,10,10"/> <!-- Horizontale Linie -->
+           
+                    
+                    <!--SchILD-Datenaustausch-Ordner-->
+                    <StackPanel Orientation="Vertical" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="SchILD-Datenaustausch-Ordner" 
+                                   FontSize="16" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="10,10,10,10" MaxWidth="430" HorizontalAlignment="Center">
+                        <Border 
+                            Width="260" 
+                            Height="20" 
+                            Background="White"
+                            BorderBrush="White" 
+                            BorderThickness="2">
+        
+                            <TextBlock 
+                                Name="lblPfadSchilddateien"
+                                Foreground="Black"
+                                VerticalAlignment="Center"
+                                Padding="5,0,5,0"
+                                Text="Ordner auswählen..."
+                                PointerPressed="lblPfadSchilddateien_Click"
+                            />
+                        </Border>
+                    </StackPanel>
+
+                    <!--Downloads-Ordner-->
+                    <StackPanel Orientation="Vertical" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="Downloads-Ordner" 
+                                   FontSize="16" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="10,10,10,10" MaxWidth="430" HorizontalAlignment="Center">
+                        <Border 
+                            Width="260" 
+                            Height="20" 
+                            Background="White"
+                            BorderBrush="White" 
+                            BorderThickness="2">
+        
+                            <TextBlock 
+                                Name="lblPfadExportdateien"
+                                Foreground="Black"
+                                VerticalAlignment="Center"
+                                Padding="5,0,5,0"
+                                Text="Ordner auswählen..."
+                                PointerPressed="lblPfadExportdateien_Click"
+                            />
+                        </Border>
+                    </StackPanel>
+                    
+                    <StackPanel Orientation="Vertical" Margin="10,10,0,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="In welchem Ordner soll BKB die neuen Dateien ablegen?" 
+                                   FontSize="12" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    
+                    <Border Height="1" Background="White" Margin="10,10,10,10"/> <!-- Horizontale Linie -->
+                    
+                    <!--Maximales Alter der Dateien-->
+                    <StackPanel Orientation="Vertical" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="Höchstalter der Dateien" 
+                                   FontSize="16" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBox 
+                            Foreground="Black"
+                            Name="tbxMaxAlter"
+                            Width="260" 
+                            Height="20"
+                            VerticalAlignment="Center" 
+                            Background="White"
+                            BorderBrush="White" 
+                            BorderThickness="2"
+                            TextChanged="TbxMaxAlter_TextChanged"
+                            HorizontalAlignment="Center" />
+
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Margin="10,10,10,10" MaxWidth="300" HorizontalAlignment="Center">
+                        <TextBlock Text="Lassen Sie sich warnen, wenn die Datei(en) veraltet sind." 
+                                   FontSize="12" Foreground="#364B6D" Width="260" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    
+                    <Border Height="1" Background="White" Margin="10,5,10,10"/> <!-- Horizontale Linie -->
+                </StackPanel>
+            </SplitView.Pane>
+        </SplitView>
+   
+        <!-- Überschrift -->
+        <TextBlock Text="Webuntis-Dateien zu SchILD-Dateien umwandeln"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Margin="0,30,0,0"
+                   Foreground="White"/>
+
+        <!-- Zentrierter Satz -->
+        <TextBlock Text="... und umgekehrt"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Margin="0,80,0,0"
+                   FontSize="16"
+                   Foreground="White"/>
+
+        <Grid Name="BilderGrid" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,110,0,0" />
+        
+        <!-- Bereich für Upload-Image -->
+        <StackPanel Name="UploadImage" 
+                    Orientation="Vertical"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    Margin="60,150,60,0"
+                    >
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                    <Grid Width="64" Height="64">
+                        <Image Name="imgClipStudents" Source="avares://gui/Assets/upload-64.png" 
+                               Width="64" Height="64" PointerPressed="ImgClip_PointerPressed"/>
+                    </Grid>
+                    <TextBlock Text="Klicken, um Dateien hochzuladen" HorizontalAlignment="Left" FontSize="16" Foreground="White"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+      
+        
+        <!-- Dropdown-Menü -->
+        <ComboBox Name="cbxKlassen" Width="260" Height="30" Background="#364B6D"
+                 HorizontalAlignment="Center"
+                 BorderBrush="White"
+                 VerticalAlignment="Top"
+                 Margin="0,360,0,0"
+                 IsEnabled="False">
+            <ComboBoxItem IsSelected="True"/>
+        </ComboBox>
+
+        <!-- Zentrierter Button -->
+
+        <Button Name="btnLosGehts" 
+                Content="Dateien erzeugen"
+                Width="260" Height="40"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,400,0,0"
+                Background="Red"
+                Foreground="White"
+                BorderBrush="White"
+                BorderThickness="2"
+                IsEnabled="False"
+                Click="Button_Click"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center">
+            <Button.Styles>
+                <!-- Style für den Mouseover-Effekt -->
+                <Style Selector="Button:pointerover">
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Foreground" Value="Red"/>
+                </Style>
+            </Button.Styles>
+        </Button>
+
+
+
+        <Grid Name="HinweisContainer" VerticalAlignment="Top" Margin="0,450,0,0" />
+
+        <!-- Untere Reihe mit einem orangen Hintergrund -->
+        <Border Background="Orange"
+                VerticalAlignment="Bottom" 
+                Margin="0,0,0,0"
+                Padding="10" ZIndex="2">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center" 
+                        Spacing="10">
+         
+                <!-- Copyright-Vermerk -->
+                <TextBlock Text="© 2025 Konstantin und Stefan Bäumer"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           FontSize="14"
+                           Margin="0,10,0,10"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

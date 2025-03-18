@@ -1,0 +1,16 @@
+// filepath: /home/stefan/RiderProjects/BKB/.vscode/tasks.json
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/shell/shell.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}
