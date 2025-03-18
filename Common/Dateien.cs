@@ -445,7 +445,7 @@ public class Dateien : List<Datei>
         if (Global.Veraltet)
         {
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("                                                               *) Veraltete Dateien.");
+            Console.WriteLine("                    *) Veraltete Dateien. Dateien älter als " + Global.MaxDateiAlter + " Tage.");
             Console.ResetColor();
         }
     }

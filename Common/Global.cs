@@ -46,9 +46,9 @@ public static string? SmtpUser { get; set; }
     public static string? User { get; set; }
     public static int MaxDateiAlter { get; set; }
     public static int MaximaleAnzahlFehlstundenProTag { get; set; }
-    public static int FehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt { get; set; }
+    public static int FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt { get; set; }
     public static DateTime DatenimportLetztesDatum { get; set; }
-    public static object? WikiSprechtagKleineÄnderung { get; set; }
+    public static object? WikiSprechtagKleineAenderung { get; set; }
     public static List<string>? Protokoll { get; set; }
     public static Dateien? Dateien { get; internal set; }
     public static string PfadExportdateien { get; set; }
@@ -267,7 +267,7 @@ public static string? SmtpUser { get; set; }
     public static void ZeileSchreiben(string linkeSeite, string rechteSeite, ConsoleColor foreground = ConsoleColor.Black, ConsoleColor background = ConsoleColor.White)
     {             
         var gesamtbreite = Console.WindowWidth;
-        var punkte = gesamtbreite - linkeSeite.Length - rechteSeite.Length - 5;
+        var punkte = gesamtbreite - linkeSeite.Length - rechteSeite.Length - 6;
         var mitte = " .".PadRight(Math.Max(3, punkte), '.') + " ";
 
         // Wenn linkeSeite auf einen Punkt endet, dann wird das Leerzeichen links durch einen Punkt ersetzt
@@ -277,7 +277,7 @@ public static string? SmtpUser { get; set; }
             mitte = "." + mitte.Substring(1);
         }
 
-        WriteLine("".PadRight(2) + linkeSeite + mitte + rechteSeite, foreground, background);
+        WriteLine("".PadRight(2) + linkeSeite + mitte + rechteSeite + " ", foreground, background);
     }
     
     private static void WriteLine(string meldung, ConsoleColor foreground, ConsoleColor background)
@@ -356,42 +356,52 @@ public static string? SmtpUser { get; set; }
     }
 
     public static void Speichern(string key, string value)
-    {
-        var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        var configPath = Path.Combine(documentsFolderPath, "BKB.json");
+{
+    var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+    var configPath = Path.Combine(documentsFolderPath, "BKB.json");
                 
-        // Aktuelle JSON-Daten lesen
-        string jsonFilePath = configPath;
-        var json = File.ReadAllText(jsonFilePath);
-        var jsonDoc = JsonDocument.Parse(json);
-        var jsonRoot = jsonDoc.RootElement;
+    // Aktuelle JSON-Daten lesen
+    string jsonFilePath = configPath;
+    var json = File.ReadAllText(jsonFilePath);
+    var jsonDoc = JsonDocument.Parse(json);
+    var jsonRoot = jsonDoc.RootElement;
+    
+    string finalValue = EncryptValue(value);
 
-        // Neuen Wert setzen
-        using (var stream = new MemoryStream())
+    // Neuen Wert setzen
+    using (var stream = new MemoryStream())
+    {
+        using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
         {
-            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+            writer.WriteStartObject();
+            foreach (var property in jsonRoot.EnumerateObject())
             {
-                writer.WriteStartObject();
-                foreach (var property in jsonRoot.EnumerateObject())
+                if (property.NameEquals(key))
                 {
-                    if (property.NameEquals(key))
-                    {
-                        writer.WriteString(key, value);
-                    }
-                    else
-                    {
-                        property.WriteTo(writer);
-                    }
+                    writer.WriteString(key, finalValue);
                 }
-
-                writer.WriteEndObject();
+                else
+                {
+                    property.WriteTo(writer);
+                }
             }
 
-            // Neue JSON-Daten in die Datei schreiben
-            File.WriteAllText(jsonFilePath, System.Text.Encoding.UTF8.GetString(stream.ToArray()));
+            writer.WriteEndObject();
         }
-    }
 
+        // Neue JSON-Daten in die Datei schreiben
+        File.WriteAllText(jsonFilePath, System.Text.Encoding.UTF8.GetString(stream.ToArray()));
+    }
+}
+
+// Hilfsmethode zur Verschlüsselung
+    public static string EncryptValue(string value)
+    {
+        // Beispiel für eine einfache Verschlüsselung (Base64)
+        byte[] data = Encoding.UTF8.GetBytes(value);
+        string encryptedValue = Convert.ToBase64String(data);
+        return encryptedValue;
+    }
     public static void OpenCurrentFolder()
     {
         Console.WriteLine("     Der Ordner " + Environment.CurrentDirectory + " wird geöffent.");
@@ -552,7 +562,7 @@ public static string? SmtpUser { get; set; }
     {
         beschreibung = string.IsNullOrEmpty(beschreibung) ? "Bitte " + parameter + " eingeben " : beschreibung;
         
-        var value = configuration[parameter];
+        var value = DecryptValue(configuration[parameter]);
         var property = typeof(Global).GetProperty(parameter, BindingFlags.Public | BindingFlags.Static);
 
         if (value != "null")
@@ -565,7 +575,8 @@ public static string? SmtpUser { get; set; }
                 }
                 else
                 {
-                    property?.SetValue(Convert.ToInt32(value), Convert.ChangeType(Convert.ToInt32(value), property.PropertyType));
+                    
+                    
                 }
             }
             else if (datentyp == Datentyp.DateTime)
@@ -1094,7 +1105,9 @@ public static string? SmtpUser { get; set; }
             });
         }
 
-        ZeileSchreiben("Wie geht es weiter:", "x : Einstellungen öffnen; y : Dokumentation öffnen; Anykey : zurück zum Menü", ConsoleColor.Black, ConsoleColor.Gray);
+        Console.ResetColor();
+        Console.WriteLine(" ");
+        ZeileSchreiben("Mit Anykey zurück zum Menü", "oder: x : Einstellungen öffnen; y : Dokumentation öffnen", ConsoleColor.Black, ConsoleColor.Gray);
        
         var weiter = Console.ReadKey(true); // true unterdrückt die Ausgabe des Zeichens im Terminal
 
@@ -1112,5 +1125,19 @@ public static string? SmtpUser { get; set; }
 
         Console.ResetColor();
         Console.Clear();
+    }
+    public static string DecryptValue(string encryptedValue)
+    {
+        // Beispiel für eine einfache Entschlüsselung (Base64)
+        try
+        {
+            byte[] data = Convert.FromBase64String(encryptedValue);
+            return Encoding.UTF8.GetString(data);
+        }
+        catch
+        {
+            // Falls der Wert nicht entschlüsselt werden kann, wird er unverändert zurückgegeben
+            return encryptedValue;
+        }
     }
 }    

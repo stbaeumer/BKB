@@ -47,7 +47,7 @@ public static class MenueHelper
                         "Webuntis-Export-Datei erstellen (Schüler*innen plus Fotos)",
                         anrechnungen,
                         quelldateien.Notwendige([
-                            "student_", "schuelerzusatzdaten", "schuelererzieher", "schuelerbasisdaten", "schuelerAdressen", "lehrkraefte", "klassen", 
+                            "student_", "schuelerzusatzdaten", "schuelererzieher", "schuelerbasisdaten", "schuelerAdressen", "lehrkraefte", "klassen" 
                         ]),
                         students,
                         Klassen,
@@ -68,7 +68,7 @@ public static class MenueHelper
                         "Netman und Littera: Exportdateien erstellen",
                         anrechnungen,
                         quelldateien.Notwendige([
-                            "student_", "schuelerzusatzdaten", "schuelererzieher", "schuelerbasisdaten", "klassen", "lehrkraefte"
+                            "student_", "schuelerzusatzdaten", "schuelererzieher", "schuelerbasisdaten", "schuelerAdressen", "lehrkraefte", "klassen"
                         ]),
                         students,
                         Klassen,

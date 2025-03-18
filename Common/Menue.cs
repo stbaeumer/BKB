@@ -40,9 +40,12 @@ public class Menue : List<Menüeintrag>
     }
 
     public void AuswahlKonsole(IConfiguration configuration)
-    {
+    {       
+        Console.ResetColor();
+        Console.WriteLine("  ");
         Global.ZeileSchreiben("Auswahl treffen:", "x: Einstellungen ändern; y: Dokumentation online öffnen", ConsoleColor.Black, ConsoleColor.Yellow);
-        
+        Console.ResetColor();
+        Console.WriteLine("  ");
         var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         var configPath = Path.Combine(documentsFolderPath, "BKB.json");
 
@@ -74,15 +77,15 @@ public class Menue : List<Menüeintrag>
         if(fehlermeldung)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("");
-            Console.WriteLine("     *) Der Menüeintrag kann nicht gewählt werden. Dateien / Tabellen fehlen oder sind leer.");
-            Console.WriteLine("");
+            Console.WriteLine(" ");
+            Console.WriteLine("  *) Keine Auswahl möglich: Dateien/Tabellen fehlen, sind leer oder älter als " + Global.MaxDateiAlter + " Tage.");
+            Console.WriteLine(" ");
         }
 
         var wiederhole = true;
         do
         {
-            Console.WriteLine("");
+            Console.WriteLine(" ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("    Ihre Auswahl [" + AusgewaehlterMenueEintrag + "] : ");
             Console.ResetColor();

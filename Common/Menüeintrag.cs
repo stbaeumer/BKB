@@ -445,7 +445,7 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
         }
 
         Konfig("MaximaleAnzahlFehlstundenProTag", true, "Maximale Anzahl zählender Fehlstunden pro Tag", Datentyp.Int);
-        Konfig("FehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt", true,
+        Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", true,
             "Anzahl Tage vor der Zeugniskonferenz, an denen Fehlzeiten unberücksichtigt bleiben",
             Datentyp.Int);
 
@@ -504,8 +504,8 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
 
                     var konferenzdatum = Global.Halbjahreskonferenzdatum;
                     var zeugnisdatum = Global.Halbjahreszeugnisdatum;
-                    var fehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt =
-                        Global.FehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt;
+                    var fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt =
+                        Global.FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt;
 
                     // Wenn bereits Lernabschnittsdaten existieren, werden die Daten dort entnommen.
                     if (dictLernabschnitt != null)
@@ -601,9 +601,9 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
                     record.Konferenzdatum = konferenzdatum.ToShortDateString();
                     record.Zeugnisdatum = zeugnisdatum.ToShortDateString();
                     record.SummeFehlstd = student.GetFehlstd(absencePerStud,
-                        fehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt);
+                        fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt);
                     record.SummeFehlstdUNTERSTRICHunentschuldigt = student.GetUnentFehlstd(absencePerStud,
-                        fehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt);
+                        fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt);
                     record.allgPUNKTMINUSbildenderLEERZEICHENAbschluss = "";
                     record.berufsbezPUNKTLEERZEICHENAbschluss = "";
                     record.Zeugnisart = zeugnisart;
@@ -1853,14 +1853,14 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
     {
         var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
-        Global.Konfig("WikiSprechtagKleineÄnderung", configuration,
+        Global.Konfig("WikiSprechtagKleineAenderung", configuration,
             "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)",
             Global.Datentyp.JaNein);
 
         dokuwikiZugriff.Options = new XmlRpcStruct
         {
             { "sum", "Automatische Aktualisierung" },
-            { "minor", Global.WikiSprechtagKleineÄnderung } // Kein Minor-Edit
+            { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
         };
 
         var content = new List<string>();

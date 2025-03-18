@@ -206,7 +206,7 @@ public partial class Student
 
     public string GetFehlstd(
         List<dynamic>? absencesPerStudent,
-        int fehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt
+        int fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt
     )
     {
         try
@@ -225,7 +225,7 @@ public partial class Student
                 if (string.IsNullOrEmpty(dict["Fehlstd."].ToString())) continue;
                 if ((DateTime.ParseExact(dict["Datum"].ToString()!, "dd.MM.yy",
                         System.Globalization.CultureInfo.InvariantCulture))
-                    .AddDays(fehlzeitenWährendDerLetztenTagBleibenUnberücksichtigt) >=
+                    .AddDays(fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt) >=
                     DateTime.Now) continue;
                 // Pro Tag werden maximal 8 Fehlstunden gezählt. Das ist wichtig, weil Webuntis bei ganztägigen Veranstaltungen 24 Stunden zählen würde.
                 var webuntisFehlst = int.Parse(dict["Fehlstd."].ToString()!);

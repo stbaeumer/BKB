@@ -84,8 +84,9 @@ public class Students : List<Student>
         }
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {
-            Console.WriteLine("    Es scheinen nur aktive Schüler exportiert worden zu sein. Bitte auch alle SuS exportieren.");
+            Global.ZeileSchreiben("Es scheinen nur aktive Schüler exportiert worden zu sein. Bitte auch exportieren:","Externe, Abgänger, Abgeschlossene", ConsoleColor.Black, ConsoleColor.Red);              
             Console.ReadKey();
+            return;
         }
     }
 
