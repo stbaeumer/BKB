@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 18.03.2025";
+Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 19.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();
@@ -49,16 +49,150 @@ var bkbJsonPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFold
 
 do
 {
-    Global.DisplayHeader(Global.Header.H1, Global.H1, Global.Protokollieren.Nein);    
+    Global.DisplayHeader(Global.Header.H1, Global.H1, Global.Protokollieren.Nein);
         
+    JsonDateiErstellenOderUpdaten(bkbJsonPath);
+
+    var configuration = GetConfiguration(bkbJsonPath);
+
+    DynamischAlleWerteAusDerKonfigurationDenGlobalenVariablenZuweisen(configuration);
+            
+    Global.ExportAusSchildVerschieben(configuration);
+
+    var raums = new Raums();
+    var lehrers = new Lehrers();
+    var klassen = new Klassen();
+    var anrechnungen = new Anrechnungen();
+
+    try
+    {
+        if (!string.IsNullOrEmpty(Global.ConnectionStringUntis) && Global.ConnectionStringUntis.Length > 1)
+        {
+            Global.ZeileSchreiben("Daten aus Untis:", "mit DB verbunden", ConsoleColor.White,ConsoleColor.Green);
+        }
+        var periodes = new Periodes();
+        if (periodes.Count > 0)
+        {
+            var periode = periodes.GetAktuellePeriode();
+            //var feriens = new Feriens();
+            raums = new Raums(periode);
+            lehrers = new Lehrers(periode, raums);
+            klassen = new Klassen(periode, lehrers, raums);
+            anrechnungen = new Anrechnungen(lehrers);    
+        }
+    }
+    catch 
+    {
+        Console.WriteLine("Keine Verbindung zu Untis.");
+    }
+
+    var dateien = new Dateien();
+    dateien.GetInteressierendeDateienMitAllenEigenschaften();    
+    Global.ZeileSchreiben("Dateien einlesen", Global.PfadExportdateien, ConsoleColor.Black, ConsoleColor.Magenta);
+    dateien.GetZeilen();        
+    var menue = MenueHelper.Einlesen(dateien, klassen, lehrers, configuration, anrechnungen, raums);
+    if (menue == null) continue;
+    var menueintrag = menue.AuswahlKonsole(configuration);
+    Global.WeiterMitAnykey(configuration, menueintrag);
+
+} while (true);
+
+void DynamischAlleWerteAusDerKonfigurationDenGlobalenVariablenZuweisen(IConfiguration configuration)
+{
+    foreach (var property in typeof(Global).GetProperties())
+    {
+        var configValue = configuration[property.Name];
+        if (configValue != null)
+        {
+            // Entschlüsseln des Wertes
+            var decryptedValue = Global.Entschluesseln(configValue);
+
+            var propertyType = property.PropertyType;
+            if (propertyType == typeof(int))
+            {
+                if (decryptedValue.Length == 0)
+                {
+                    decryptedValue = "0";
+                }
+                property.SetValue(null, Convert.ToInt32(decryptedValue));
+            }
+            else if (propertyType == typeof(bool))
+            {
+                property.SetValue(null, Convert.ToBoolean(decryptedValue));
+            }
+            else if (propertyType == typeof(DateTime))
+            {
+                if (decryptedValue.Length == 0)
+                {
+                    decryptedValue = DateTime.Now.ToString("dd.MM.yyyy");
+                }
+                property.SetValue(null, Convert.ToDateTime(decryptedValue));
+            }
+            else if (propertyType == typeof(string))
+            {
+                property.SetValue(null, decryptedValue);
+            }
+            // Fügen Sie hier weitere Typen hinzu, falls erforderlich
+        }
+    }
+}
+
+IConfiguration GetConfiguration(string bkbJsonPath)
+{
+    return new ConfigurationBuilder()
+    .SetBasePath(Path.GetDirectoryName(bkbJsonPath))
+    .AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true)
+    .Build();
+}
+
+void JsonDateiErstellenOderUpdaten(string bkbJsonPath)
+{
     if (!File.Exists(bkbJsonPath))
-{     
-    var bkbJsonContent = new
+    {
+        // Datei erstellen, wenn sie nicht existiert
+        var bkbJsonContent = CreateBkbJsonContent();
+        var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(bkbJsonPath, json);
+        Global.EinstellungenDurchlaufen(new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(bkbJsonPath)).AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true).Build());
+    }
+    else
+    {
+        // Datei existiert, prüfen und fehlende Keys ergänzen
+        var existingContent = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(bkbJsonPath));
+        // Standard-Keys aus CreateBkbJsonContent
+        var defaultContent = JsonSerializer.SerializeToElement(CreateBkbJsonContent()).EnumerateObject();
+        var defaultKeys = defaultContent.Select(property => property.Name).ToHashSet();
+
+        // Entferne nicht mehr benötigte Keys
+        var keysToRemove = existingContent.Keys.Except(defaultKeys).ToList();
+        foreach (var key in keysToRemove)
+        {
+            existingContent.Remove(key);
+        }
+
+        // Ergänze fehlende Keys
+        foreach (var property in defaultContent)
+        {
+            if (!existingContent.ContainsKey(property.Name))
+            {
+                existingContent[property.Name] = property.Value.GetString();
+            }
+        }
+
+        // Datei mit aktualisierten Inhalten speichern
+        var updatedJson = JsonSerializer.Serialize(existingContent, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(bkbJsonPath, updatedJson);
+    }
+}
+
+static object CreateBkbJsonContent()
+{
+    return new
     {
         Global.PfadExportdateien,
         Global.PfadSchilddateien,
-        Kalenderfilter = Global.Verschluesseln(""),    
-        Auswahl = 1,//Global.EncryptValue("1"),
+        Kalenderfilter = Global.Verschluesseln(""),
+        Auswahl = 1,
         Klassen = Global.Verschluesseln("HBG"),
         Vergleich = Global.Verschluesseln("n"),
         Kennwort = Global.Verschluesseln(""),
@@ -99,90 +233,4 @@ do
         SmtpPort = Global.Verschluesseln("587"),
         NetmanMailReceiver = Global.Verschluesseln("stefan.baeumer@berufskolleg-borken.de")
     };
-    var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });        
-    File.WriteAllText(bkbJsonPath, json);                        
-    Global.EinstellungenDurchlaufen(new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(bkbJsonPath)).AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true).Build());
 }
-
-    var configuration = new ConfigurationBuilder()
-    .SetBasePath(Path.GetDirectoryName(bkbJsonPath))
-    .AddJsonFile(Path.GetFileName(bkbJsonPath), optional: false, reloadOnChange: true)
-    .Build();
-
-// Dynamisch alle Werte aus der Konfiguration den globalen Variablen zuweisen
-foreach (var property in typeof(Global).GetProperties())
-{
-    var configValue = configuration[property.Name];
-    if (configValue != null)
-    {
-        // Entschlüsseln des Wertes
-        var decryptedValue = Global.Entschluesseln(configValue);
-
-        var propertyType = property.PropertyType;
-        if (propertyType == typeof(int))
-        {
-            if (decryptedValue.Length == 0)
-            {
-                decryptedValue = "0";
-            }
-            property.SetValue(null, Convert.ToInt32(decryptedValue));
-        }
-        else if (propertyType == typeof(bool))
-        {
-            property.SetValue(null, Convert.ToBoolean(decryptedValue));
-        }
-        else if (propertyType == typeof(DateTime))
-        {
-            if (decryptedValue.Length == 0)
-            {
-                decryptedValue = DateTime.Now.ToString("dd.MM.yyyy");
-            }
-            property.SetValue(null, Convert.ToDateTime(decryptedValue));
-        }
-        else if (propertyType == typeof(string))
-        {
-            property.SetValue(null, decryptedValue);
-        }
-        // Fügen Sie hier weitere Typen hinzu, falls erforderlich
-    }
-}
-    
-    Global.ExportAusSchildVerschieben(configuration);
-
-    var raums = new Raums();
-    var lehrers = new Lehrers();
-    var klassen = new Klassen();
-    var anrechnungen = new Anrechnungen();
-
-    try
-    {
-        if (!string.IsNullOrEmpty(Global.ConnectionStringUntis) && Global.ConnectionStringUntis.Length > 1)
-        {
-            Global.ZeileSchreiben("Daten aus Untis:", "mit DB verbunden", ConsoleColor.White,ConsoleColor.Green);
-        }
-        var periodes = new Periodes();
-        if (periodes.Count > 0)
-        {
-            var periode = periodes.GetAktuellePeriode();
-            //var feriens = new Feriens();
-            raums = new Raums(periode);
-            lehrers = new Lehrers(periode, raums);
-            klassen = new Klassen(periode, lehrers, raums);
-            anrechnungen = new Anrechnungen(lehrers);    
-        }
-    }
-    catch 
-    {
-        Console.WriteLine("Keine Verbindung zu Untis.");
-    }
-
-    var dateien = new Dateien();
-    dateien.GetInteressierendeDateienMitAllenEigenschaften();    
-    Global.ZeileSchreiben("Dateien einlesen", Global.PfadExportdateien, ConsoleColor.Black, ConsoleColor.Magenta);
-    dateien.GetZeilen();        
-    var menue = MenueHelper.Einlesen(dateien, klassen, lehrers, configuration, anrechnungen, raums);
-    if (menue == null) continue;
-    menue.AuswahlKonsole(configuration);
-    Global.WeiterMitAnykey(configuration);
-
-} while (true);

@@ -39,7 +39,7 @@ public class Menue : List<Menüeintrag>
         //AddRange(menueEintraege.Where(x => !x.MenüeintragAusblenden));
     }
 
-    public void AuswahlKonsole(IConfiguration configuration)
+    public Menüeintrag AuswahlKonsole(IConfiguration configuration)
     {       
         Console.ResetColor();
         Console.WriteLine("  ");
@@ -166,7 +166,7 @@ public class Menue : List<Menüeintrag>
                 else
                 {
                     Global.EinstellungenDurchlaufen(configuration);
-                    return;
+                    return null;
                 }
             }
             else
@@ -180,6 +180,7 @@ public class Menue : List<Menüeintrag>
         Global.DisplayHeader(Global.Header.H1, Global.H1, Global.Protokollieren.Nein);
         Global.DisplayHeader(Global.Header.H2, this[AusgewaehlterMenueEintrag - 1].Titel, Global.Protokollieren.Nein);
         Global.DisplayCenteredBox(this[AusgewaehlterMenueEintrag - 1].Beschreibung, 97);
-        this[AusgewaehlterMenueEintrag - 1].Ausführen();
+        Datei zieldatei = this[AusgewaehlterMenueEintrag - 1].Ausführen();        
+        return this[AusgewaehlterMenueEintrag - 1];
     }
 }

@@ -39,7 +39,7 @@ public class Students : List<Student>
 
         var schildschuelerexport = quelldateien
         .Where(x => x?.AbsoluterPfad?.Contains("SchildSchuelerExport") == true)
-        .OrderByDescending(x => x?.AbsoluterPfad != null ? File.GetCreationTime(x.AbsoluterPfad) : DateTime.MinValue)
+        .OrderByDescending(x => x?.AbsoluterPfad != null ? File.GetLastWriteTime(x.AbsoluterPfad) : DateTime.MinValue)
         .FirstOrDefault();
 
         if (schildschuelerexport == null)
@@ -99,7 +99,7 @@ public class Students : List<Student>
             return;
         }
 
-        Erstelldatum = File.GetCreationTime(DateiPfad);
+        Erstelldatum = File.GetLastWriteTime(DateiPfad);
 
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {

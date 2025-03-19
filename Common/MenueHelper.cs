@@ -14,8 +14,7 @@ public static class MenueHelper
             {
                 throw new Exception("Keine Schülerdaten gefunden.");
             }
-        
-            var zieldatei = new Datei();
+                    
             return new Menue(
                 quelldateien,
                 Klassen,
@@ -37,10 +36,10 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            zieldatei = m.KlassenErstellen(Path.Combine(Global.PfadSchilddateien ?? "", @"Klassen.dat"));
-                            if (!zieldatei.Any()) return;
-                            zieldatei = zieldatei.VergleichenUndFiltern(quelldateien, ["InternBez"], ["SonstigeBez", "Folgeklasse"]);
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.KlassenErstellen(Path.Combine(Global.PfadSchilddateien ?? "", @"Klassen.dat"));
+                            if (!m.Zieldatei.Any()) return;
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, ["InternBez"], ["SonstigeBez", "Folgeklasse"]);
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
                         }
                     ),
                     new Menüeintrag(
@@ -60,8 +59,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"));
-                            zieldatei?.Erstellen(";", '\'', false, false);                        
+                            m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"));
+                            m.Zieldatei?.Erstellen(";", '\'', false, false);                     
                         }
                     ),
                     new Menüeintrag(
@@ -81,15 +80,15 @@ public static class MenueHelper
                         ],
                         m =>
                         {                      
-                            zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
-                            zieldatei?.Erstellen(",", '\'', false, false);
-                            zieldatei?.Zippen(zieldatei?.GetAbsoluterPfad());
-                            zieldatei?.Mailen(Path.GetFileName(zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(zieldatei.AbsoluterPfad) ?? "", Global.NetmanMailReceiver ?? "");
+                            m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
+                            m.Zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
+                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", Global.NetmanMailReceiver ?? "", configuration);
 
-                            zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.csv"));
-                            zieldatei?.Erstellen(";", '\'', false, false);
-                            zieldatei?.Zippen(zieldatei?.GetAbsoluterPfad());
-                            zieldatei?.Mailen(Path.GetFileName(zieldatei.AbsoluterPfad ?? ""), "Verwaltung", Path.GetFileName(zieldatei.AbsoluterPfad ?? ""), Global.NetmanMailReceiver  ?? "");
+                            m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.csv"));
+                            m.Zieldatei?.Erstellen(";", '\'', false, false);
+                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
+                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad ?? ""), "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad ?? ""), Global.NetmanMailReceiver  ?? "", configuration);
                         }
                     ),
                     new Menüeintrag(
@@ -111,8 +110,8 @@ public static class MenueHelper
                         {
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
                             {
-                                zieldatei = m.Kalender2Wiki(kalender, Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender));
-                                zieldatei.Erstellen(",", '\"', false, true);    
+                                m.Zieldatei = m.Kalender2Wiki(kalender, Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender));
+                                m.Zieldatei.Erstellen(",", '\"', false, true);    
                             }
                         }
                     ),
@@ -147,29 +146,29 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            zieldatei = m.GetGruppen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
-                            zieldatei.Erstellen(",", '\"', false, true);
-                            zieldatei = anrechnungen.Anlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
-                            zieldatei.Erstellen(",", '\"', false, true);
+                            m.Zieldatei = m.GetGruppen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
+                            m.Zieldatei.Erstellen(",", '\"', false, true);
+                            m.Zieldatei = anrechnungen.Anlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
+                            m.Zieldatei.Erstellen(",", '\"', false, true);
 
-                            zieldatei = m.GetLehrer(Path.Combine(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
-                            zieldatei.Erstellen(",", '\'', false, false);
+                            m.Zieldatei = m.GetLehrer(Path.Combine(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
+                            m.Zieldatei.Erstellen(",", '\'', false, false);
 
-                            zieldatei = m.Praktikanten(
+                            m.Zieldatei = m.Praktikanten(
                                 [
                                     "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1",
                                     "IFK,1"
                                 ],
                                 Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                            zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Erstellen(",", '\'', false, false);
 
-                            zieldatei = m.KlassenAnlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                            zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei = m.KlassenAnlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
+                            m.Zieldatei?.Erstellen(",", '\'', false, false);
 
                             m.Schulpflichtüberwachung();
 
-                            zieldatei = m.GetFaecher(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
-                            zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei = m.GetFaecher(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
+                            m.Zieldatei?.Erstellen(",", '\'', false, false);
                         }
                     ),
                     new Menüeintrag(
@@ -188,25 +187,25 @@ public static class MenueHelper
                         {
                             m.FilterInteressierendeStudentsUndKlassen();
 
-                            zieldatei = m.Lernabschnittsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
+                            m.Zieldatei = m.Lernabschnittsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
                                 "SchuelerLernabschnittsdaten.dat"));
-                            zieldatei = zieldatei.VergleichenUndFiltern(quelldateien,
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien,
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
 
-                            zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
+                            m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
                                 "SchuelerLeistungsdaten.dat"));
-                            zieldatei = zieldatei.VergleichenUndFiltern(quelldateien,
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien,
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
 
-                            zieldatei = m.Faecher(Path.Combine(Global.PfadSchilddateien ?? "", "Faecher.dat"));
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.Faecher(Path.Combine(Global.PfadSchilddateien ?? "", "Faecher.dat"));
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
 
-                            zieldatei = m.Kurse(Path.Combine(Global.PfadSchilddateien ?? "", "Kurse.dat"));
-                            zieldatei = zieldatei.VergleichenUndFiltern(quelldateien, ["KursBez"],
+                            m.Zieldatei = m.Kurse(Path.Combine(Global.PfadSchilddateien ?? "", "Kurse.dat"));
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, ["KursBez"],
                                 ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
 
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine("  Schritt #1: Import nach SchILD durchführen.");
@@ -333,8 +332,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            zieldatei = m.Teilleistungen(@"ImportNachSchild\SchuelerTeilleistungen.dat");
-                            zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.Teilleistungen(@"ImportNachSchild\SchuelerTeilleistungen.dat");
+                            m.Zieldatei.Erstellen("|", '\0', true, false);
                         }
                     ),
                     new Menüeintrag(
@@ -370,7 +369,7 @@ public static class MenueHelper
                         students,
                         Klassen,
                         [],
-                        _ => lehrers.CheckAltersermäßigung(anrechnungen)                    
+                        _ => lehrers.CheckAltersermäßigung(anrechnungen)                        
                     ),
                     new Menüeintrag(
                         "Lernabschnittsdaten und Leistungsdaten alter Abschnitte von Atlantis nach SchILD importieren",
@@ -383,11 +382,11 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat");
-                            zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat");
+                            m.Zieldatei.Erstellen("|", '\0', true, false);
 
-                            zieldatei = m.LeistungsdatenAlt(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
-                            zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.LeistungsdatenAlt(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
                         }
                     ),
                     new Menüeintrag(
@@ -423,8 +422,8 @@ public static class MenueHelper
                         [],
                         m =>
                         {
-                            zieldatei = m.Zusatzdaten(@"ImportNachSchild/SchuelerZusatzdaten.dat");
-                            zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.Zusatzdaten(@"ImportNachSchild/SchuelerZusatzdaten.dat");
+                            m.Zieldatei.Erstellen("|", '\0', true, false);
                         }
                         ),
                     new Menüeintrag(
@@ -436,8 +435,8 @@ public static class MenueHelper
                         [],
                         m =>
                         {
-                            zieldatei = m.Basisdaten("ImportNachSchild/SchuelerBasisdaten.dat");
-                            zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei = m.Basisdaten("ImportNachSchild/SchuelerBasisdaten.dat");
+                            m.Zieldatei.Erstellen("|", '\0', true, false);
                         }
                     )
                 ]

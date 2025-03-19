@@ -428,8 +428,8 @@ public class Dateien : List<Datei>
             // ... sofern es eine passende Datei gibt ... 
             if (dateienImPfad.Any(d => Path.GetFileName(d).ToLower().StartsWith(datei.Dateiname.ToLower())))            
             {
-                datei.AbsoluterPfad = dateienImPfad.OrderBy(File.GetCreationTime).LastOrDefault(d => Path.GetFileName(d).StartsWith(datei.Dateiname));
-                datei.Erstelldatum = File.GetCreationTime(datei.AbsoluterPfad);
+                datei.AbsoluterPfad = dateienImPfad.OrderBy(File.GetLastWriteTime).LastOrDefault(d => Path.GetFileName(d).StartsWith(datei.Dateiname));
+                datei.Erstelldatum = File.GetLastWriteTime(datei.AbsoluterPfad);
                 
                 datei.GetZeilen();
 
@@ -445,7 +445,7 @@ public class Dateien : List<Datei>
         if (Global.Veraltet)
         {
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("                    *) Veraltete Dateien. Dateien älter als " + Global.MaxDateiAlter + " Tage.");
+            Console.WriteLine("                    Veraltete Dateien gefunden. Dateien älter als " + Global.MaxDateiAlter + " Tage.");
             Console.ResetColor();
         }
     }
@@ -502,7 +502,7 @@ public class Dateien : List<Datei>
                 .Where(f => f.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
                 f.EndsWith(".dat", StringComparison.OrdinalIgnoreCase) ||
                 f.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(f => File.GetCreationTime(f)) // Sortierung nach Erstellungsdatum
+                .OrderBy(f => File.GetLastWriteTime(f)) // Sortierung nach Erstellungsdatum
                 .ToList();
     }
 }

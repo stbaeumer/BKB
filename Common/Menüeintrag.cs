@@ -28,6 +28,7 @@ public class Menüeintrag
     /// Interessierende Students
     /// </summary>
     public Students IStudents { get; set; }
+    public Datei Zieldatei { get; set; }
 
     public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen,List<string> beschreibung, Action<Menüeintrag> funktion)
     {
@@ -44,9 +45,10 @@ public class Menüeintrag
         IStudents = new Students();
     }
 
-    public void Ausführen()
-    {
-        Funktion?.Invoke(this);
+    public Datei Ausführen()
+    {        
+        Funktion?.Invoke(this);        
+        return Zieldatei;
     }
 
     public Datei LernabschnittsdatenAlt(string zielDateiname)

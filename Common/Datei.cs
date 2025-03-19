@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration;
 using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Extensions.Configuration;
 
 namespace Common;
 
@@ -446,11 +447,11 @@ public class Datei : List<dynamic>
         }
         finally
         {
-            Global.ZeileSchreiben(Path.GetFileName(AbsoluterPfad) + " - Zeilen:", this.Count().ToString(), ConsoleColor.DarkMagenta, ConsoleColor.White);
+            Global.ZeileSchreiben(AbsoluterPfad + " - Zeilen:", this.Count().ToString(), ConsoleColor.DarkMagenta, ConsoleColor.White);
 
             var rechteSeite = "bereit für den Import";
 
-            Global.ZeileSchreiben(Path.GetFileName(AbsoluterPfad) + " neu erstellt", rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
+            Global.ZeileSchreiben(AbsoluterPfad + " neu erstellt", rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
         }
     }
 
@@ -780,7 +781,7 @@ public class Datei : List<dynamic>
         return AbsoluterPfad;
     }
 
-    public void Zippen(string? absoluterPfad)
+    public void Zippen(string? absoluterPfad, IConfiguration configuration)
     {
         if (this.Count == 0)
         {
@@ -788,6 +789,9 @@ public class Datei : List<dynamic>
         }
         
         var zipPfad = absoluterPfad.Replace(".csv", ".zip");
+
+        Global.Konfig("ZipKennwort", configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
+
         
         try
         {
@@ -834,12 +838,19 @@ public class Datei : List<dynamic>
         }
     }
 
-    internal void Mailen(string subject, string absendername, string body, string receiverEmail)
+    internal void Mailen(string subject, string absendername, string body, string receiverEmail, IConfiguration configuration)
     {
         if(this.Count == 0)
         {
             return;
         }
+
+        Global.Konfig("SmtpUser", configuration, "Mail-Benutzer angeben");
+        Global.Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben");
+        Global.Konfig("SmtpPort", configuration, "SMTP-Port eingeben");
+        Global.Konfig("SmtpServer", configuration, "SMTP-Server angeben");
+        Global.Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden?");
+
         var mail = new Mail();
         mail.Senden(subject,absendername,body,ZipPfad,receiverEmail);
     }

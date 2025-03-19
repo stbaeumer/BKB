@@ -742,8 +742,7 @@ public static string? SmtpUser { get; set; }
                 // Falls der Wert erfolgreich geparst wurde, setzen wir ihn und beenden die Schleife
                 if (convertedValue == null) continue;
                 Speichern(parameter, userInput);
-                property.SetValue(null, convertedValue);
-                Console.WriteLine("  " +parameter.PadRight(41) + convertedValue.ToString().Replace(" 00:00:00", ""));
+                property.SetValue(null, convertedValue);                
                 break;
             }
         }
@@ -971,7 +970,7 @@ public static string? SmtpUser { get; set; }
         {
             var destinationPath = Path.Combine(Global.PfadExportdateien, Path.GetFileName(datei));
             File.Copy(datei, destinationPath, true);
-            Console.WriteLine("Die Datei " + Path.GetFileName(datei) + " wurde erfolgreich nach " + Global.PfadExportdateien + " kopiert.");
+            //Console.WriteLine("Die Datei " + Path.GetFileName(datei) + " wurde erfolgreich nach " + Global.PfadExportdateien + " kopiert.");
         }
 
         // Hole alle .dat-Dateien aus dem Quellordner
@@ -983,7 +982,7 @@ public static string? SmtpUser { get; set; }
         {
             // Hole die Erstellungszeiten der Dateien
             var creationTimes = datFiles
-                .Select(file => File.GetCreationTime(file))
+                .Select(file => File.GetLastWriteTime(file))
                 .OrderBy(time => time)
                 .ToList();
 
@@ -1065,20 +1064,17 @@ public static string? SmtpUser { get; set; }
     }
 
     public static void EinstellungenDurchlaufen(IConfiguration configuration)
-    {        
+    {   
+        Console.Clear();
+        Global.DisplayHeader(Global.Header.H1, Global.H1, Global.Protokollieren.Nein);
+
         ZeileSchreiben("Einstellungen", PfadSchilddateien, ConsoleColor.Black, ConsoleColor.Cyan);
         
         Konfig("PfadExportdateien", configuration, @"Downloads-Ordner angeben", Datentyp.Pfad);
         Konfig("PfadSchilddateien", configuration, @"SchILD-Dateien-Ordner", Datentyp.Pfad);
-        Konfig("MaxDateiAlter", configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", Datentyp.Int);
-        Konfig("ZipKennwort", configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
+        Konfig("MaxDateiAlter", configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", Datentyp.Int);        
         Konfig("ConnectionStringUntis", configuration, "ConnectionStringUntis eingeben (optional)");
-        Konfig("MailDomain", configuration, "Mail-Domain für Schüler*innen eingeben");
-        Konfig("SmtpUser", configuration, "Mail-Benutzer angeben (optional)");
-        Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben (optional)");
-        Konfig("SmtpPort", configuration, "SMTP-Port eingeben (optional)");
-        Konfig("SmtpServer", configuration, "SMTP-Server angeben (optional)");
-        Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden");
+        Konfig("MailDomain", configuration, "Mail-Domain für Schüler*innen eingeben");        
         
         Speichern("EinstellungenVorgenommen", configuration["EinstellungenVorgenommen"] = "j");
     }
@@ -1095,15 +1091,19 @@ public static string? SmtpUser { get; set; }
         }
     }
 
-    public static void WeiterMitAnykey(IConfiguration configuration)
+    public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag)
     {                    
         if(!Global.CodeSpace)
         {
-            Process.Start(new ProcessStartInfo
+            if(menüeintrag != null && menüeintrag.Zieldatei != null)
             {
-                FileName = Global.PfadSchilddateien,
-                UseShellExecute = true
-            });
+                var dateiPfad = Path.GetDirectoryName(menüeintrag.Zieldatei.AbsoluterPfad);
+                Process.Start(new ProcessStartInfo
+                {                
+                    FileName = dateiPfad,
+                    UseShellExecute = true
+                });
+            }            
         }
 
         Console.ResetColor();
