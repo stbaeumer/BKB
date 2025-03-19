@@ -43,7 +43,7 @@ public static class MenueHelper
                         }
                     ),
                     new Menüeintrag(
-                        "Webuntis-Export-Datei erstellen (Schüler*innen plus Fotos)",
+                        "Webuntis-Datei (Schüler*innen plus Fotos) erstellen",
                         anrechnungen,
                         quelldateien.Notwendige([
                             "student_", "schuelerzusatzdaten", "schuelererzieher", "schuelerbasisdaten", "schuelerAdressen", "lehrkraefte", "klassen" 
@@ -387,6 +387,22 @@ public static class MenueHelper
 
                             m.Zieldatei = m.LeistungsdatenAlt(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
                             m.Zieldatei?.Erstellen("|", '\0', true, false);
+                        }
+                    ),
+                    new Menüeintrag(
+                        "Fehlende Klassenbucheinträge bei den KuK anmahnen",
+                        anrechnungen,
+                        quelldateien.Notwendige(["lehrkraefte"]),
+                        students,
+                        Klassen,
+                        [
+                            " 1. "
+                        ],
+                        m =>
+                        {
+                            var pdfDatei = new PdfDatei(Global.PfadExportdateien + "/OpenPeriod.pdf");
+                            lehrers = new Lehrers(quelldateien.Notwendige(["lehrkraefte"]));
+                            lehrers.OffeneKlassenbuchEinträgeMahnen(pdfDatei.DateiName);                            
                         }
                     ),
                     new Menüeintrag(

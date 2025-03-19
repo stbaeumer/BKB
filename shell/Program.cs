@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 19.03.2025";
+Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 20.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();

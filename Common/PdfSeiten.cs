@@ -1,5 +1,6 @@
 using System.Text;
-//using PdfReader = iTextSharp.text.pdf.PdfReader;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 public class PdfSeiten : List<PdfSeite>
 {
@@ -34,22 +35,40 @@ public class PdfSeiten : List<PdfSeite>
 
     public void Read(string dateiName)
     {
-        /*
+        List<string> lehrer = new List<string>();
+
         QuellDateiName = dateiName;
 
-        using (var pdfReader = new PdfReader(dateiName))
+        using (var pdfDocument = PdfDocument.Open(dateiName))
         {
-            for (int i = 1; i <= pdfReader.NumberOfPages; i++)
+            int seitenNummer = 1;
+            foreach (Page page in pdfDocument.GetPages())
             {
-                StringBuilder text = new StringBuilder();
-                text.Append(PdfTextExtractor.GetTextFromPage(pdfReader, i));
-                string inhalt = text.ToString();
-                Add(new PdfSeite(i, inhalt, dateiName));
+                foreach (var word in page.GetWords())
+                {
+                    // Prüfe, ob die linke x-Koordinate (BoundingBox.Left) ungefähr 100 ist
+                    if (Math.Abs(word.BoundingBox.Left - 100) < 0.1)
+                    {
+                        lehrer.Add(word.Text); 
+                        //Console.WriteLine($"Seite {seitenNummer}: Text: {word.Text}, Position: {word.BoundingBox}");
+                    }
+                }                
             }
+        }
 
-            Global.ZeileSchreiben(dateiName + " - Seiten:", this.Count().ToString(), Global.Farbe.Weiss);
-        }*/
+        // Gib die 3 häufigsten Nennungen aus der Liste "lehrer" aus
+        var topLehrer = lehrer.GroupBy(x => x)
+                      .OrderByDescending(g => g.Count())
+                      .Take(3)
+                      .Select(g => new { Name = g.Key, Count = g.Count() });
+
+        Console.WriteLine("Die 3 häufigsten Nennungen:");
+        foreach (var item in topLehrer)
+        {
+            Console.WriteLine($"Name: {item.Name}, Häufigkeit: {item.Count}");
+        }   
     }
+
 
     public string GetDatum()
     {
@@ -105,5 +124,10 @@ public class PdfSeiten : List<PdfSeite>
         }
 
         return "";
+    }
+
+    internal void ZähleOffeneKlassenbuchEinträge(object lehrer)
+    {
+        throw new NotImplementedException();
     }
 }

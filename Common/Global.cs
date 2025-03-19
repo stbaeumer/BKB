@@ -27,6 +27,7 @@ public static class Global
     public static string? MariaPort { get; set; }
     public static string? MariaPw { get; set; }
     public static string? PdfKennwort { get; set; }
+    public static string? OpenPeriodPfad { get; set; }
 
 public static string? NetmanMailReceiver { get; set; }
 
@@ -1075,7 +1076,13 @@ public static string? SmtpUser { get; set; }
         Konfig("MaxDateiAlter", configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", Datentyp.Int);        
         Konfig("ConnectionStringUntis", configuration, "ConnectionStringUntis eingeben (optional)");
         Konfig("MailDomain", configuration, "Mail-Domain für Schüler*innen eingeben");        
-        
+        Konfig("ZipKennwort", configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
+        Konfig("SmtpUser", configuration, "Mail-Benutzer angeben");
+        Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben");
+        Konfig("SmtpPort", configuration, "SMTP-Port eingeben");
+        Konfig("SmtpServer", configuration, "SMTP-Server angeben");
+        Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden?");
+            
         Speichern("EinstellungenVorgenommen", configuration["EinstellungenVorgenommen"] = "j");
     }
 

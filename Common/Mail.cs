@@ -22,9 +22,10 @@ public class Mail
 
             var email = new MimeMessage();
             email.From.Add(new MailboxAddress(absendername, senderEmail));
-            email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
+            //email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
+            email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
             email.Subject = subject;
-            email.Bcc.Add(new MailboxAddress("Empfänger", Global.SmtpUser));
+            email.Cc.Add(new MailboxAddress("Empfänger", Global.SmtpUser));
 
             // 1️⃣ Erstelle den Haupttext der E-Mail
             var textPart = new TextPart("plain") { Text = body };
@@ -62,9 +63,7 @@ public class Mail
         }
         catch(Exception ex){
             Global.ZeileSchreiben(receiverEmail, "Versand gescheitert.", ConsoleColor.Red,ConsoleColor.Gray);        
-
             Console.WriteLine("Fehler beim Versand der E-Mail an " + receiverEmail + ": " + ex.Message);
-
         }
     }
 }

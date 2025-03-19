@@ -789,9 +789,6 @@ public class Datei : List<dynamic>
         }
         
         var zipPfad = absoluterPfad.Replace(".csv", ".zip");
-
-        Global.Konfig("ZipKennwort", configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
-
         
         try
         {
@@ -845,12 +842,14 @@ public class Datei : List<dynamic>
             return;
         }
 
-        Global.Konfig("SmtpUser", configuration, "Mail-Benutzer angeben");
-        Global.Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben");
-        Global.Konfig("SmtpPort", configuration, "SMTP-Port eingeben");
-        Global.Konfig("SmtpServer", configuration, "SMTP-Server angeben");
-        Global.Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden?");
-
+        if(Global.SmtpUser == null || Global.SmtpPassword == null || Global.SmtpPort == null || Global.SmtpServer == null || Global.NetmanMailReceiver == null){
+            Global.Konfig("SmtpUser", configuration, "Mail-Benutzer angeben");
+            Global.Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben");
+            Global.Konfig("SmtpPort", configuration, "SMTP-Port eingeben");
+            Global.Konfig("SmtpServer", configuration, "SMTP-Server angeben");
+            Global.Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden?");
+        }
+        
         var mail = new Mail();
         mail.Senden(subject,absendername,body,ZipPfad,receiverEmail);
     }
@@ -877,5 +876,10 @@ public class Datei : List<dynamic>
     internal List<dynamic> FilternSchildSchuelerExport()
     {
             return this;
+    }
+
+    internal List<dynamic> FilterOpenPeriod()
+    {
+        return this;
     }
 }

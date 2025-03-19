@@ -228,6 +228,14 @@ public class Dateien : List<Datei>
             d => d.FilternSchildKlassen()
         ));
         Add(new Datei(
+            "OpenPeriod",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilterOpenPeriod()
+        ));
+        Add(new Datei(
             "SchuelerZusatzdaten",
             "Beschreibung",
             schildhinweise,

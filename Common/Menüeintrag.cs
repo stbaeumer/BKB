@@ -1320,10 +1320,17 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
         {
             if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
-            var schildStudent = Students.Where(x =>
-                    x.Nachname == webuntisStudent["longName"].ToString() && x.Vorname == webuntisStudent["foreName"].ToString() && x.Geburtsdatum == webuntisStudent["birthDate"].ToString())
-                .OrderBy(x => x.Status) // Wenn ein Schüler nach dem Abschluss z.B. als Gast eine neue ID bekommt, zählt die höchste ID. 
-                .FirstOrDefault();
+            var schildStudent = Students
+            .Where(x =>
+                x.Nachname == webuntisStudent["longName"].ToString() &&
+                x.Vorname == webuntisStudent["foreName"].ToString() &&
+                x.Geburtsdatum == webuntisStudent["birthDate"].ToString())
+            .OrderByDescending(x => int.TryParse(x.IdSchild, out var id) ? id : 0) // IdSchild in int umwandeln, Standardwert 0 bei Fehler
+            .FirstOrDefault(); // Gibt den Schüler mit der höchsten IdSchild zurück
+                    
+            if(schildStudent.Nachname == "Fischer" && schildStudent.Vorname == "Tobias"){
+                string a = "a";
+            }
 
             if (schildStudent == null) continue;
 
@@ -1399,9 +1406,14 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
         {
             // Es kann sein, dass Schüler nach Abschluss als Gast bleiben. 
             // Es wird angenommen, dass der letzte in der Importliste der aktuelle ist.
-            var student = Students.LastOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
+            var student = Students.OrderByDescending(x => int.TryParse(x.IdSchild, out var id) ? id : 0)
+            .FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
 
             if(student == null) continue;
+
+            if(student.Nachname == "Fischer"){
+                string a = "a";
+            }
 
             // Wenn der Schüler in Webuntis nicht existiert, ...
             if (!webuntisStudents.Any(rec =>

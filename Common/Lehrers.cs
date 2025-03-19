@@ -1,10 +1,33 @@
 using System.Globalization;
 using Microsoft.Data.SqlClient;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 public class Lehrers : List<Lehrer>
 {
+    private Dateien dateien;
+
     public Lehrers()
     {
+    }
+    public Lehrers(Dateien dateien)
+    {
+        List<dynamic>? lul = dateien.GetMatchingList("lehrkraefte", null, null);
+        
+        var liste = new List<dynamic>();
+        
+        foreach (var rec in lul)
+        {
+            var dict = (IDictionary<string, object>)rec;
+
+            var l = new Lehrer();
+            l.Kürzel = dict["InternKrz"].ToString();
+            l.Nachname = dict["Nachname"].ToString();
+            l.Vorname = dict["Vorname"].ToString();
+            l.Mail = dict["E-Mail"].ToString();
+            l.Titel = dict["Titel"].ToString();
+            this.Add(l);
+        }
     }
 
     public Lehrers(int periode, Raums raums)
@@ -208,6 +231,76 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             {
                 Console.WriteLine("   " + item);
             }
+        }
+    }
+
+    public void OffeneKlassenbuchEinträgeMahnen(string dateiName)
+    {
+        List<string> lehrer = new List<string>();
+
+        using (var pdfDocument = PdfDocument.Open(dateiName))
+        {
+            foreach (Page page in pdfDocument.GetPages())
+            {
+                foreach (var word in page.GetWords())
+                {
+                    // Prüfe, ob die linke x-Koordinate (BoundingBox.Left) ungefähr 100 ist
+                    if (Math.Abs(word.BoundingBox.Left - 100) < 0.1)
+                    {
+                        if (word.Text != "Lehrkraft"){
+                            lehrer.Add(word.Text);
+                        }                        
+                    }
+                }                
+            }
+        }
+
+        // Gib die 3 häufigsten Nennungen aus der Liste "lehrer" aus
+        var topLehrer = lehrer.GroupBy(x => x)
+                      .OrderByDescending(g => g.Count())
+                      .Take(10)
+                      .Select(g => new { Name = g.Key, Count = g.Count() });
+
+        Global.ZeileSchreiben("TOP10 Offene Klassenbuch-Einträge", "Häufigkeit", ConsoleColor.Black, ConsoleColor.Blue);
+                
+        foreach (var item in topLehrer)
+        {
+            Global.ZeileSchreiben($"{item.Name}", $"{item.Count}", ConsoleColor.Blue, ConsoleColor.Black);        
+        }   
+
+        
+        Console.WriteLine("  Jetzt per Mail senden? [J/n]");
+        var x = Console.ReadKey().Key;
+        if (x == ConsoleKey.J || x == ConsoleKey.Enter)
+        {
+            int i = 1;
+            foreach (var item in topLehrer)
+            {
+                var le = (from l in this where l.Kürzel == item.Name select l).FirstOrDefault();
+                
+                if(le != null)
+                {
+                    var body = "Guten Morgen " + le.Titel+ le.Vorname + " " + le.Nachname + ",\n\n";
+                    body += "es liegen " + item.Count + " offene Klassenbuch-Einträge vor, die Ihrer Verantwortung zugeordnet sind. ";
+                    body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
+                    body += "Vielen Dank für Ihre Unterstützung.\n\n";
+                    body += "Mit freundlichen Grüßen\n\n";
+                    body += "Ihr Webuntis-Team";
+                    
+                    var mail = new Mail();                        
+                    mail.Senden($"😐 Platz #{i} in der Liste der offenen Klassenbuch-Einträge", 
+                "webuntis@berufskolleg-borken.de", 
+                body, 
+                null, 
+                le.Mail); 
+                    Global.ZeileSchreiben($"Name: {item.Name}", $"gesendet", ConsoleColor.Green, ConsoleColor.White);        
+                }
+                
+                i++;
+            }
+        }else
+        {
+            Console.WriteLine("  Sie haben sich gegen den Mailversand entschieden.");
         }
     }
 }
