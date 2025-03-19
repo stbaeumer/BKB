@@ -52,7 +52,9 @@ public class Menue : List<Menüeintrag>
         Console.ForegroundColor = ConsoleColor.Yellow;
         //Console.WriteLine("".PadRight(Console.WindowWidth, '='));
 
-        var xx = IndexOf(this.FirstOrDefault(menueeintrag => menueeintrag.Titel == configuration["Auswahl"])!);
+        var wert = Global.Entschluesseln(configuration["Auswahl"]);
+
+        var xx = IndexOf(this.FirstOrDefault(menueeintrag => menueeintrag.Titel == wert)!);
 
         AusgewaehlterMenueEintrag = xx >= 0 ? Math.Max(1, xx + 1) : 1;
 
@@ -125,8 +127,7 @@ public class Menue : List<Menüeintrag>
                                         Global.ZeileSchreiben(datei.Dateiname, datei.Fehlermeldung, ConsoleColor.Black, ConsoleColor.Red);
                                         Global.DisplayCenteredBox(datei.Hinweise.ToList(), 97);
                                     }
-                                    
-                                    
+                                                                        
                                     Console.ResetColor();
                                     wiederhole = true;
                                     continue;

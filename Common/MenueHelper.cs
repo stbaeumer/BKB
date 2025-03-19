@@ -338,16 +338,17 @@ public static class MenueHelper
                         }
                     ),
                     new Menüeintrag(
-                        "Von PDF-Dateien auf dem Desktop verschlüsselte Kopien erstellen.",
+                        "Von PDF-Dateien in " + Global.PfadExportdateien + " verschlüsselte Kopien erstellen.",
                         anrechnungen,
-                        quelldateien,
+                        new Dateien(),
                         students,
                         Klassen,
-                        ["Die Funktion kann genutzt werden, um PDF-Dateien mit Kennwort in Office365 zu versenden."],
+                        ["Von PDF-Dateien in " + Global.PfadExportdateien + " wird eine verschlüsselte Kopie erstellt.",
+                        "Kopien bekommen die Dateiendung '-kennwort.pdf'"],
                         _ =>
                         {
                             var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen();
+                            pdfDateien.KennwortSetzen(configuration);
                         }
                     ),
                     new Menüeintrag(

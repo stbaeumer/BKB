@@ -26,6 +26,7 @@ public static class Global
     public static string? MariaIp { get; set; }
     public static string? MariaPort { get; set; }
     public static string? MariaPw { get; set; }
+    public static string? PdfKennwort { get; set; }
 
 public static string? NetmanMailReceiver { get; set; }
 
@@ -366,7 +367,7 @@ public static string? SmtpUser { get; set; }
     var jsonDoc = JsonDocument.Parse(json);
     var jsonRoot = jsonDoc.RootElement;
     
-    string finalValue = EncryptValue(value);
+    string finalValue = Verschluesseln(value);
 
     // Neuen Wert setzen
     using (var stream = new MemoryStream())
@@ -395,7 +396,7 @@ public static string? SmtpUser { get; set; }
 }
 
 // Hilfsmethode zur Verschlüsselung
-    public static string EncryptValue(string value)
+    public static string Verschluesseln(string value)
     {
         // Beispiel für eine einfache Verschlüsselung (Base64)
         byte[] data = Encoding.UTF8.GetBytes(value);
@@ -562,7 +563,7 @@ public static string? SmtpUser { get; set; }
     {
         beschreibung = string.IsNullOrEmpty(beschreibung) ? "Bitte " + parameter + " eingeben " : beschreibung;
         
-        var value = DecryptValue(configuration[parameter]);
+        var value = Entschluesseln(configuration[parameter]);
         var property = typeof(Global).GetProperty(parameter, BindingFlags.Public | BindingFlags.Static);
 
         if (value != "null")
@@ -1126,7 +1127,7 @@ public static string? SmtpUser { get; set; }
         Console.ResetColor();
         Console.Clear();
     }
-    public static string DecryptValue(string encryptedValue)
+    public static string Entschluesseln(string encryptedValue)
     {
         // Beispiel für eine einfache Entschlüsselung (Base64)
         try

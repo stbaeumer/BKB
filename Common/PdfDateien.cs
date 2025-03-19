@@ -34,93 +34,37 @@ public class PdfDateien : List<PdfDatei>
         }
     }
     
-    public void KennwortSetzen()
+    public void KennwortSetzen(IConfiguration configuration)
     {
         try
         {
             var fileGroupPdf =
-                (from f in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\",
-                        "*.pdf")
+                (from f in Directory.GetFiles(Global.PfadExportdateien, "*.pdf")
                     where !f.Contains("-Kennwort")
                     select f).ToList();
 
-            Console.WriteLine("");
+            Global.ZeileSchreiben("Dateien bereit für die Verschlüsselung", fileGroupPdf.Count == 0 ? "keine gefunden" : fileGroupPdf.Count.ToString(), ConsoleColor.White, ConsoleColor.DarkBlue);
+            
             foreach (var file in fileGroupPdf)
             {
-                Global.ZeileSchreiben(file, "bereit zum Erstellen einer kennwortgeschützten Kopie", ConsoleColor.White, ConsoleColor.Green);
+                Global.ZeileSchreiben(file, "bereit zum Erstellen einer kennwortgeschützten Kopie", ConsoleColor.Blue, ConsoleColor.Black);
+            }
+
+            if(fileGroupPdf.Count == 0){
+                return;
             }
 
             var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             var configPath = Path.Combine(documentsFolderPath, "BKB.json");
 
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile(configPath, optional: false, reloadOnChange: true).Build();
-            var kennwort = configuration["Kennwort"];
-
-            Console.WriteLine("");
-            Console.WriteLine("   Bitte ein Kennwort wählen");
-            Console.WriteLine("");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("      Ihr Kennwort [" + kennwort + "] : ");
-            Console.WriteLine("");
-            Console.ResetColor();
-
-            var x = Console.ReadLine();
-
-            if (x == "ö")
-            {
-                Global.OpenCurrentFolder();
-            }
-
-            if (x == "x")
-            {
-                Global.OpenWebseite("https://wiki.svws.nrw.de/mediawiki/index.php?title=Schnittstellenbeschreibung");
-            }
-
-            if ((x == "" && kennwort != ""))
-            {
-                Global.Speichern("Kennwort", kennwort!);
-            }
-
-            if (x != "")
-            {
-                Global.Speichern("Kennwort", x);
-            }
-
-            string[] fileGroupJpg =
-                Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\", "*.png");
-
-/*
-            foreach (string fileName in (from f in fileGroupJpg where !f.Contains("-Kennwort") select f).ToList())
-            {
-                Document document = new Document(new Rectangle(288f, 144f), 10, 10, 10, 10);
-                document.SetPageSize(iTextSharp.text.PageSize.A4.Rotate());
-
-                using (var stream =
-                       new FileStream(fileName + ".pdf", FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    PdfWriter.GetInstance(document, stream);
-                    document.Open();
-                    using (var imageStream =
-                           new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                    {
-                        var image = Image.GetInstance(imageStream);
-                        image.SetAbsolutePosition(0, 0); // set the position to bottom left corner of pdf
-                        image.ScaleAbsolute(iTextSharp.text.PageSize.A4.Height,
-                            iTextSharp.text.PageSize.A4.Width); // set the height and width of image to PDF page size
-                        document.Add(image);
-                    }
-
-                    document.Close();
-                }
-            }*/
+            Global.Konfig("PdfKennwort", configuration, "PDF-Kennwort festlegen");
 
             foreach (string fileName in fileGroupPdf)
             {
                 PdfSharp.Pdf.PdfDocument document = PdfSharp.Pdf.IO.PdfReader.Open(fileName);
                 PdfSecuritySettings securitySettings = document.SecuritySettings;
-                securitySettings.UserPassword = kennwort!;
-                securitySettings.OwnerPassword = kennwort!;
+                securitySettings.UserPassword = Global.PdfKennwort!;
+                securitySettings.OwnerPassword = Global.PdfKennwort!;
                 //securitySettings.PermitAccessibilityExtractContent = false;
                 securitySettings.PermitAnnotations = false;
                 securitySettings.PermitAssembleDocument = false;
@@ -136,22 +80,12 @@ public class PdfDateien : List<PdfDatei>
 
                 document.Save(neueDatei);
 
-                Global.ZeileSchreiben(neueDatei, "Kopie mit Kennwort erstellt", ConsoleColor.Yellow,ConsoleColor.Gray);
+                Global.ZeileSchreiben(neueDatei, "Kopie mit Kennwort erstellt", ConsoleColor.Blue,ConsoleColor.Black);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-        }
-        finally
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("");
-            Console.WriteLine("      Weiter mit ENTER");
-            Console.WriteLine("");
-            Console.ResetColor();
-
-            Console.ReadKey();
         }
     }
 }
