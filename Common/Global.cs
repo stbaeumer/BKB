@@ -274,7 +274,8 @@ public static string? SmtpUser { get; set; }
 
         // Wenn linkeSeite auf einen Punkt endet, dann wird das Leerzeichen links durch einen Punkt ersetzt
 
-        if (linkeSeite.Substring(linkeSeite.Length - 1, 1) == ".")
+
+        if (linkeSeite.Length > 1 && linkeSeite.Substring(linkeSeite.Length - 1, 1) == ".")
         {
             mitte = "." + mitte.Substring(1);
         }

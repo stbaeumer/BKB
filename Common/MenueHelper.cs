@@ -392,7 +392,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Fehlende Klassenbucheinträge bei den KuK anmahnen",
                         anrechnungen,
-                        quelldateien.Notwendige(["lehrkraefte"]),
+                        quelldateien.Notwendige(["lehrkraefte", "openperiod"]),
                         students,
                         Klassen,
                         [
@@ -400,9 +400,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            var pdfDatei = new PdfDatei(Global.PfadExportdateien + "/OpenPeriod.pdf");
-                            lehrers = new Lehrers(quelldateien.Notwendige(["lehrkraefte"]));
-                            lehrers.OffeneKlassenbuchEinträgeMahnen(pdfDatei.DateiName);                            
+                            lehrers = new Lehrers(m.Quelldateien);
+                            lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien);                            
                         }
                     ),
                     new Menüeintrag(

@@ -94,7 +94,6 @@ do
     if (menue == null) continue;
     var menueintrag = menue.AuswahlKonsole(configuration);
     Global.WeiterMitAnykey(configuration, menueintrag);
-
 } while (true);
 
 void DynamischAlleWerteAusDerKonfigurationDenGlobalenVariablenZuweisen(IConfiguration configuration)

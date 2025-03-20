@@ -234,8 +234,10 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
         }
     }
 
-    public void OffeneKlassenbuchEinträgeMahnen(string dateiName)
+    public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien)
     {
+        var dateiName = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod")).AbsoluterPfad;
+
         List<string> lehrer = new List<string>();
 
         using (var pdfDocument = PdfDocument.Open(dateiName))
@@ -255,7 +257,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             }
         }
 
-        // Gib die 3 häufigsten Nennungen aus der Liste "lehrer" aus
+        // Gib die 10 häufigsten Nennungen aus der Liste "lehrer" aus
         var topLehrer = lehrer.GroupBy(x => x)
                       .OrderByDescending(g => g.Count())
                       .Take(10)
@@ -267,9 +269,8 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
         {
             Global.ZeileSchreiben($"{item.Name}", $"{item.Count}", ConsoleColor.Blue, ConsoleColor.Black);        
         }   
-
         
-        Console.WriteLine("  Jetzt per Mail senden? [J/n]");
+        Console.WriteLine("  Jetzt die TOP10 per Mail anschreiben? [J/n]");
         var x = Console.ReadKey().Key;
         if (x == ConsoleKey.J || x == ConsoleKey.Enter)
         {
@@ -281,14 +282,14 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                 if(le != null)
                 {
                     var body = "Guten Morgen " + le.Titel+ le.Vorname + " " + le.Nachname + ",\n\n";
-                    body += "es liegen " + item.Count + " offene Klassenbuch-Einträge vor, die Ihrer Verantwortung zugeordnet sind. ";
+                    body += "es liegen sehr" + (i < 3 ? " , sehr":"") + " viele offene Klassenbuch-Einträge (" + item.Count + ") vor, die Ihrer Verantwortung zugeordnet sind.";
                     body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
                     body += "Vielen Dank für Ihre Unterstützung.\n\n";
                     body += "Mit freundlichen Grüßen\n\n";
                     body += "Ihr Webuntis-Team";
-                    
+                
                     var mail = new Mail();                        
-                    mail.Senden($"😐 Platz #{i} in der Liste der offenen Klassenbuch-Einträge", 
+                    mail.Senden($"👋 Platz " + (i==10? "\U0001F51F" : i +"\uFE0F\u20E3") + " in der Liste der offenen Klassenbuch-Einträge", 
                 "webuntis@berufskolleg-borken.de", 
                 body, 
                 null, 

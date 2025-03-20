@@ -86,7 +86,11 @@ public class Datei : List<dynamic>
     public List<dynamic> Filtern(Students students, Klassen klassen)
     {
         IStudents = students;
-        KlassenNamen = klassen.Where(x => !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToList();
+        if(klassen != null)
+        {
+            KlassenNamen = klassen.Where(x => !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToList();
+        }
+        
         return Funktion?.Invoke(this) ?? new List<dynamic>(); // Falls `Funktion` null ist, leere Liste zurückgeben
     }
 
@@ -733,6 +737,11 @@ public class Datei : List<dynamic>
     {
         this.Clear();
 
+        if(AbsoluterPfad != null && AbsoluterPfad.EndsWith(".pdf"))
+        {
+            return;
+        }
+
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HeaderValidated = null,
@@ -867,10 +876,19 @@ public class Datei : List<dynamic>
             fussnote = " *)";
         }
 
-        Global.ZeileSchreiben(
+        if(AbsoluterPfad != null && AbsoluterPfad.EndsWith(".pdf"))
+        {
+            Global.ZeileSchreiben(
+                (Path.GetFileName(AbsoluterPfad) + " ").PadRight(40, '.') + " " + Erstelldatum + fussnote,
+                "PDF-Datei",
+                foreground, background);            
+        }else
+        {
+            Global.ZeileSchreiben(
             (Path.GetFileName(AbsoluterPfad) + " ").PadRight(40, '.') + " " + Erstelldatum + fussnote,
             this.Count().ToString(),
             foreground, background);
+        }
     }
 
     internal List<dynamic> FilternSchildSchuelerExport()

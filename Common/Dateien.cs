@@ -32,7 +32,17 @@ public class Dateien : List<Datei>
             " Die Datei in " + Global.PfadExportdateien + " speichern."
         };
 
-
+        Add(new Datei(
+            "OpenPeriod",
+            "Beschreibung",
+            ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:", 
+            "Klassenbuch > Offene Stunden > Bericht", 
+            "Die PDF-Datei in " + Global.PfadExportdateien + " speichern."],
+            [""],
+            true,
+            d => d.FilterOpenPeriod(),
+            "*.pdf"
+        ));
         Add(new Datei(
             "SchildSchuelerExport",
             "Beschreibung",
@@ -226,15 +236,7 @@ public class Dateien : List<Datei>
             [""],
             true,
             d => d.FilternSchildKlassen()
-        ));
-        Add(new Datei(
-            "OpenPeriod",
-            "Beschreibung",
-            schildhinweise,
-            [""],
-            true,
-            d => d.FilterOpenPeriod()
-        ));
+        ));        
         Add(new Datei(
             "SchuelerZusatzdaten",
             "Beschreibung",
@@ -333,6 +335,11 @@ public class Dateien : List<Datei>
                 Global.ZeileSchreiben(pattern, "0", ConsoleColor.Red, ConsoleColor.White);
             }
         }
+        else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
+        {            
+            Global.ZeileSchreiben(Path.GetFileName(datei.AbsoluterPfad), datei.Count().ToString(), ConsoleColor.Red,ConsoleColor.White);    
+            return datei.ToList();
+        }
         else if (students == null && !datei.AbsoluterPfad.Contains("SchildSchuelerExport"))
         {            
             Global.ZeileSchreiben(Path.GetFileName(datei.AbsoluterPfad) + ": Schüler:", "0", ConsoleColor.Red,ConsoleColor.White);    
@@ -398,7 +405,12 @@ public class Dateien : List<Datei>
                 if(absoluterPfad.Length > 0)
                 {                          
                     if(datei.Count == 0){
-                        datei.Fehlermeldung = absoluterPfad + " existiert, ist aber leer.";
+                        if(datei.AbsoluterPfad.EndsWith(".pdf"))
+                        {
+                            datei.Fehlermeldung = "";
+                        }else{
+                            datei.Fehlermeldung = absoluterPfad + " existiert, ist aber leer.";
+                        }                       
                     }else{
                         if(datei.Erstelldatum.AddDays(Global.MaxDateiAlter) <= DateTime.Now){
 
@@ -506,11 +518,12 @@ public class Dateien : List<Datei>
 
     public List<string> GetDateienImPfad()
     {
-        return Directory.GetFiles(Global.PfadExportdateien, "*", SearchOption.AllDirectories)
-                .Where(f => f.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(".dat", StringComparison.OrdinalIgnoreCase) ||
-                f.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
-                .OrderBy(f => File.GetLastWriteTime(f)) // Sortierung nach Erstellungsdatum
-                .ToList();
+        return Directory.GetFiles(Global.PfadExportdateien, "*", SearchOption.TopDirectoryOnly) // Nur im aktuellen Verzeichnis suchen
+        .Where(f => f.EndsWith(".csv", StringComparison.OrdinalIgnoreCase) ||
+                    f.EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
+                    f.EndsWith(".dat", StringComparison.OrdinalIgnoreCase) ||
+                    Path.GetFileNameWithoutExtension(f).ToLower().StartsWith("openperiod", StringComparison.OrdinalIgnoreCase))
+        .OrderBy(f => File.GetLastWriteTime(f)) // Nach Erstellungsdatum sortieren
+        .ToList();
     }
 }
