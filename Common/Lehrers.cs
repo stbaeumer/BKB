@@ -236,7 +236,8 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
 
     public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien)
     {
-        var dateiName = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod")).AbsoluterPfad;
+        var matchingDatei = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod"));
+        var dateiName = matchingDatei != null ? matchingDatei.AbsoluterPfad : throw new InvalidOperationException("No matching file found for 'openperiod'.");
 
         List<string> lehrer = new List<string>();
 
@@ -289,7 +290,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                     body += "Ihr Webuntis-Team";
                 
                     var mail = new Mail();                        
-                    mail.Senden($"👋 Platz " + (i==10? "\U0001F51F" : i +"\uFE0F\u20E3") + " in der Liste der offenen Klassenbuch-Einträge", 
+                    mail.Senden($"👋 Platz " + (i==10? "\U0001F51F" : i +"\uFE0F\u20E3") + " in der Liste der offenen Klassenbuch-Einträge (" + le.Kürzel + ")", 
                 "webuntis@berufskolleg-borken.de", 
                 body, 
                 null, 

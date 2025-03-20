@@ -298,8 +298,12 @@ public class Gruppe
 
         foreach (var member in members)
         {
+if(member == "GV"){
+    string a="";
+}
+
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
-            if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
+           if (!lehrerKürzel.Any(x => x == leh.Kürzel)) // Exakte Übereinstimmung prüfen
             {
                 lehrerKürzel.Add(leh.Kürzel);
             }

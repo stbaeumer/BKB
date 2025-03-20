@@ -135,7 +135,7 @@ public static class MenueHelper
                         "BKB.wiki: Dateien erstellen",
                         anrechnungen,
                         quelldateien.Notwendige([
-                            "schuelerZusatzdaten", "absenceperstudent"
+                            "schuelerzusatzdaten", "absenceperstudent", "exportlesson"
                         ]),
                         students,
                         Klassen,
@@ -146,12 +146,12 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.Zieldatei = m.GetGruppen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
+                            m.Zieldatei = m.GetGruppen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
                             m.Zieldatei.Erstellen(",", '\"', false, true);
-                            m.Zieldatei = anrechnungen.Anlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
+                            m.Zieldatei = anrechnungen.Anlegen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
                             m.Zieldatei.Erstellen(",", '\"', false, true);
 
-                            m.Zieldatei = m.GetLehrer(Path.Combine(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
+                            m.Zieldatei = m.GetLehrer(Path.Combine(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
                             m.Zieldatei.Erstellen(",", '\'', false, false);
 
                             m.Zieldatei = m.Praktikanten(
@@ -159,15 +159,15 @@ public static class MenueHelper
                                     "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1",
                                     "IFK,1"
                                 ],
-                                Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
+                                Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', false, false);
 
-                            m.Zieldatei = m.KlassenAnlegen(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
+                            m.Zieldatei = m.KlassenAnlegen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', false, false);
 
                             m.Schulpflichtüberwachung();
 
-                            m.Zieldatei = m.GetFaecher(Path.Combine(Global.PfadSchilddateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
+                            m.Zieldatei = m.GetFaecher(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', false, false);
                         }
                     ),
@@ -396,7 +396,26 @@ public static class MenueHelper
                         students,
                         Klassen,
                         [
-                            " 1. "
+                            "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden angemahnt.",
+                            "Die Anzahl der offenen Klassenbucheinträge wird aus der Datei 'OpenPeriods' ausgelesen.",
+                            "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird gefragt."
+                        ],
+                        m =>
+                        {
+                            lehrers = new Lehrers(m.Quelldateien);
+                            lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien);                            
+                        }
+                    ),
+                    new Menüeintrag(
+                        "E-Mail-Adressen auf PDF-Seiten suchen und die betreffende Seiten mailen",
+                        anrechnungen,
+                        quelldateien.Notwendige(["lehrkraefte"]),
+                        students,
+                        Klassen,
+                        [
+                            "PDF-Dateien werden eingelesen.",
+                            "Jede Seite wird nach E-Mail-Adressen durchsucht.",
+                            "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt."
                         ],
                         m =>
                         {

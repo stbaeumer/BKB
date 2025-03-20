@@ -227,9 +227,9 @@ static object CreateBkbJsonContent()
         ConnectionStringUntis = Global.Verschluesseln(""),
         EinstellungenVorgenommen = Global.Verschluesseln("n"),
         SmtpServer = Global.Verschluesseln("smtp.office365.com"),
-        SmtpUser = Global.Verschluesseln("stefan.baeumer@berufskolleg-borken.de"),
+        SmtpUser = Global.Verschluesseln("webuntis@berufskolleg-borken.de"),
         SmtpPassword = Global.Verschluesseln(""),
         SmtpPort = Global.Verschluesseln("587"),
-        NetmanMailReceiver = Global.Verschluesseln("stefan.baeumer@berufskolleg-borken.de")
+        NetmanMailReceiver = Global.Verschluesseln("thomas.kottenstede@berufskolleg-borken.de")
     };
 }

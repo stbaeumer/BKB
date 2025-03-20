@@ -16,14 +16,6 @@ public class Dateien : List<Datei>
             " Die Datei(en) in " + Global.PfadExportdateien + " speichern."
         };
 
-        var outlookhinweise = new string[]
-        {
-            "Exportieren Sie die Datei aus Outlook, indem Sie:",
-            " ...",
-            " ...",
-            " ... "
-        };
-
         var untishinweise = new string[]
         {
             "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
@@ -140,7 +132,13 @@ public class Dateien : List<Datei>
         Add(new Datei(
             @"Adressen.csv",
             "Beschreibung",
-            outlookhinweise,
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                "Die Datei " + Path.Combine(Global.PfadExportdateien,"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+            ],
             [""],
             true,
             d => d.FilternAdressenAtlantis(),
@@ -150,7 +148,13 @@ public class Dateien : List<Datei>
         Add(new Datei(
             @"termine_kollegium.csv",
             "Beschreibung",
-            outlookhinweise,
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                "Die Datei " + Path.Combine(Global.PfadExportdateien,"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+            ],
             [""],
             true,
             d => d.FilternTermineKollegium(),
@@ -160,7 +164,13 @@ public class Dateien : List<Datei>
         Add(new Datei(
             @"termine_fhr.csv",
             "Beschreibung",
-            outlookhinweise,
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                "Die Datei " + Path.Combine(Global.PfadExportdateien,"termine_fhr.csv") + " überschreiben oder neu anlegen."
+            ],
             [""],
             true,
             d => d.FilternTermineFhr(),
@@ -170,7 +180,13 @@ public class Dateien : List<Datei>
         Add(new Datei(
             @"termine_verwaltung.csv",
             "Beschreibung",
-            outlookhinweise,
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                "Die Datei " + Path.Combine(Global.PfadExportdateien,"termine_verwaltung.csv") + " überschreiben oder neu anlegen."
+            ],
             [""],
             true,
             d => d.FilternTermineVerwaltung(),
@@ -180,7 +196,13 @@ public class Dateien : List<Datei>
         Add(new Datei(
             @"termine_berufliches_gymnasium.csv",
             "Beschreibung",
-            outlookhinweise,
+             [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                "Die Datei " + Path.Combine(Global.PfadExportdateien,"termine_berufliches_gymnasium.csv") + " überschreiben oder neu anlegen."
+            ],
             [""],
             true,
             d => d.FilternTermineBeruflichesGymnasium(),

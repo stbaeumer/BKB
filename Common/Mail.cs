@@ -23,9 +23,10 @@ public class Mail
             var email = new MimeMessage();
             email.From.Add(new MailboxAddress(absendername, senderEmail));
             //email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
-            email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
+            //email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
+            
             email.Subject = subject;
-            email.Cc.Add(new MailboxAddress("Empfänger", Global.SmtpUser));
+            email.Cc.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
 
             // 1️⃣ Erstelle den Haupttext der E-Mail
             var textPart = new TextPart("plain") { Text = body };

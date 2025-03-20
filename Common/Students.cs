@@ -189,8 +189,12 @@ public class Students : List<Student>
         int verjaehrungUnbescholtene,
         int nachSovielenTagenVerjährenFehlzeitenBeiMaßnahme,
         Klassen klasses,
-        List<Datei> dateien)
-    {
+        Dateien dateien)
+        {
+        
+        var schuelerZusatzdaten = dateien.GetMatchingList("schuelerzusatzdaten", null, null);
+        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return;
+
         var tempdatei = Path.Combine(Path.GetTempPath(), Path.GetFileName(datei));
 
         File.WriteAllText(tempdatei,
@@ -238,10 +242,6 @@ public class Students : List<Student>
             "chats>sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de,";
         var mailliste =
             "mailto:sina.milewski@berufskolleg-borken.de;stefan.gantefort@berufskolleg-borken.de;ursula.moritz@berufskolleg-borken.de;";
-
-        List<dynamic> schuelerZusatzdaten = dateien
-            .Where(rec => !string.IsNullOrEmpty(rec.UnterordnerUndDateiname))
-            .FirstOrDefault(rec => rec.UnterordnerUndDateiname.Contains("SchuelerZusatzdaten"))!.ToList();
 
         foreach (var kl in (from k in this.OrderBy(x => x.Klasse) select k.Klasse).Distinct().ToList())
         {
