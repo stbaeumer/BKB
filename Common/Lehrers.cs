@@ -24,7 +24,7 @@ public class Lehrers : List<Lehrer>
             l.Kürzel = dict["InternKrz"].ToString();
             l.Nachname = dict["Nachname"].ToString();
             l.Vorname = dict["Vorname"].ToString();
-            l.Mail = dict["E-Mail"].ToString();
+            l.Mail = dict["dienstl. E-Mail"].ToString();
             l.Titel = dict["Titel"].ToString();
             this.Add(l);
         }
@@ -283,19 +283,18 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                 if(le != null)
                 {
                     var body = "Guten Morgen " + le.Titel+ le.Vorname + " " + le.Nachname + ",\n\n";
-                    body += "es liegen sehr" + (i < 3 ? " , sehr":"") + " viele offene Klassenbuch-Einträge (" + item.Count + ") vor, die Ihrer Verantwortung zugeordnet sind.";
+                    body += "es liegen sehr" + (i < 3 ? ", sehr":"") + " viele offene Klassenbuch-Einträge (" + item.Count + ") vor, die Ihrer Verantwortung zugeordnet sind.";
                     body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
                     body += "Vielen Dank für Ihre Unterstützung.\n\n";
                     body += "Mit freundlichen Grüßen\n\n";
                     body += "Ihr Webuntis-Team";
                 
                     var mail = new Mail();                        
-                    mail.Senden($"👋 Platz " + (i==10? "\U0001F51F" : i +"\uFE0F\u20E3") + " in der Liste der offenen Klassenbuch-Einträge (" + le.Kürzel + ")", 
+                    mail.Senden(  $"👋 Platz " + (i==10? "\U0001F51F" : i +"\uFE0F\u20E3") + " in der Liste der offenen Klassenbuch-Einträge (" + le.Kürzel + ")", 
                 "webuntis@berufskolleg-borken.de", 
                 body, 
                 null, 
-                le.Mail); 
-                    Global.ZeileSchreiben($"Name: {item.Name}", $"gesendet", ConsoleColor.Green, ConsoleColor.White);        
+                le.Mail);                     
                 }
                 
                 i++;

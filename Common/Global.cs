@@ -29,6 +29,16 @@ public static class Global
     public static string? PdfKennwort { get; set; }
     public static string? OpenPeriodPfad { get; set; }
 
+    public static string? SchipsPasswort { get; set; }
+    public static string? ZeugnisPasswort { get; set; }
+    public static string? ZeugnisUrl { get; set; }
+    public static string? SchipsUrl { get; set; }
+    public static string? SchipsOderZeugnisseOderAnderePdfs { get; set; }
+
+
+
+
+
 public static string? NetmanMailReceiver { get; set; }
 
 public static string? SmtpServer { get; set; }
@@ -620,7 +630,7 @@ public static string? SmtpUser { get; set; }
                     var wert = currentValueStr.Replace(" 00:00:00", "");
                     if (parameter.Contains("ennwort") || parameter.Contains("asswor"))
                     {
-                        wert = wert.Substring(0, Math.Min(wert.Length, 3)) + "**********";
+                        wert = (wert.Substring(0, Math.Min(wert.Length, 2))).PadRight(wert.Length,'*');
                     }
 
                     Console.ForegroundColor = ConsoleColor.Cyan;

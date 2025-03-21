@@ -1180,4 +1180,17 @@ public partial class Student
             .Select(rec => ((IDictionary<string, object>)rec)["Entlassdatum"]?.ToString())
             .LastOrDefault() ?? string.Empty;
     }
+
+    internal bool GetMahnung(List<dynamic> marksPerLs, string fach)
+    {
+         return marksPerLs.Any(mark =>
+        {
+            var dict = (IDictionary<string, object>)mark;
+            return dict["Name"].ToString().Contains(Vorname) &&
+            dict["Name"].ToString().Contains(Nachname) &&
+            dict["Klasse"].ToString() == Klasse &&
+            dict["Fach"].ToString() == fach &&
+            dict["Prüfungsart"].ToString().Contains("Mahnung");
+        });
+    }
 }

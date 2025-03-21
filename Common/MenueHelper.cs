@@ -185,7 +185,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.FilterInteressierendeStudentsUndKlassen();
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
 
                             m.Zieldatei = m.Lernabschnittsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
                                 "SchuelerLernabschnittsdaten.dat"));
@@ -230,15 +230,17 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Mahnungen importieren",
                         anrechnungen,
-                        quelldateien.Notwendige(["marksperlesson"]),
+                        quelldateien.Notwendige(["marksperlesson", "schuelerleistungsdaten", "exportlessons", "studentgroupstudents", "schuelerleistungsdaten", "schuelerbasisdaten"]),
                         students,
                         Klassen,
                         [
-                            "Importdateien Mahnungen importieren."
+                            "Die Datei SchuelerLeistungsdaten wird erstellt.",
+                            "Die Datei SchuelerLeistungsdaten kann dann nach SchILD importiert werden.",
                         ],
                         m =>
-                        {
-                            //dateien.Funktion(dateien.Benötigte(["MarksPerLessons"]));
+                        {                            
+                            m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadExportdateien ?? "", "SchuelerLeistungsdaten.dat"), "Mahnung");
+                            m.Zieldatei?.Erstellen("|", '\0', true, false);
                         }
                     ),
                     new Menüeintrag(
@@ -251,8 +253,8 @@ public static class MenueHelper
                             "Lehrkräfte können über Teams angeschrieben werden."
                         ],
                         m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen();
+                        {                            
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
 
                             var datei = m.GetGruppen("", anrechnungen, lehrers ?? []);
 
@@ -382,7 +384,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.Zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat");
+                            m.Zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat", configuration);
                             m.Zieldatei.Erstellen("|", '\0', true, false);
 
                             m.Zieldatei = m.LeistungsdatenAlt(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");

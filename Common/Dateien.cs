@@ -359,7 +359,7 @@ public class Dateien : List<Datei>
         }
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
         {            
-            Global.ZeileSchreiben(Path.GetFileName(datei.AbsoluterPfad), datei.Count().ToString(), ConsoleColor.Red,ConsoleColor.White);    
+            Global.ZeileSchreiben(Path.GetFileName(datei.AbsoluterPfad), datei.Count().ToString(), ConsoleColor.Yellow,ConsoleColor.White);    
             return datei.ToList();
         }
         else if (students == null && !datei.AbsoluterPfad.Contains("SchildSchuelerExport"))

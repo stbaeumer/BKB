@@ -51,11 +51,11 @@ public class Menüeintrag
         return Zieldatei;
     }
 
-    public Datei LernabschnittsdatenAlt(string zielDateiname)
+    public Datei LernabschnittsdatenAlt(string zielDateiname, IConfiguration configuration)
     {
         var zieldatei = new Datei(zielDateiname);
 
-        FilterInteressierendeStudentsUndKlassen();
+        FilterInteressierendeStudentsUndKlassen(configuration);
 
         var basisDa = Quelldateien.GetMatchingList("basisdaten", IStudents, Klassen);
         if (basisDa == null || !basisDa.Any()) return new Datei(zielDateiname);
@@ -174,13 +174,9 @@ public class Menüeintrag
     /// <summary>
     /// Die IStundets und die IKlassen (List<string>) werden als Eigenschaft des Menüeintrags initialisiert.
     /// </summary>
-    public void FilterInteressierendeStudentsUndKlassen()
-    {
-        var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-        var configPath = Path.Combine(documentsFolderPath, "BKB.json");
-        
-        var configuration = new ConfigurationBuilder().AddJsonFile(configPath, optional: false, reloadOnChange: true).Build();
-        var klassen = configuration["Klassen"];
+    public void FilterInteressierendeStudentsUndKlassen(IConfiguration configuration)
+    {        
+        var klassen = Global.Entschluesseln(configuration["Klassen"]);
 
         var interessierendeKlassen = new List<string>();
         var interessierendeStudents = new Students();
@@ -628,20 +624,54 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
         return null;
     }
 
-    public Datei Leistungsdaten(string zieldateiname)
+    public Datei Leistungsdaten(string zieldateiname, string art = "")
     {
         var zieldatei = new Datei(zieldateiname);
-
-        var zielDatei = new Datei(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
-        var expLessons = Quelldateien.GetMatchingList("exportlessons", IStudents, Klassen);
+        
+        if(art == "Mahnung")
+        {
+            IStudents = Students;
+        }
+        
         var marksPerLs = Quelldateien.GetMatchingList("marksperlesson", IStudents, Klassen);
+        if (marksPerLs == null || marksPerLs.Count == 0) return [];
+
+        var expLessons = Quelldateien.GetMatchingList("exportlessons", IStudents, Klassen);
+        if (expLessons == null || expLessons.Count == 0) return [];
+        
         var stdgroupSs = Quelldateien.GetMatchingList("studentgroupstudents", IStudents, Klassen);
-        if (!stdgroupSs.Any()) return null;
-        var schLeistus = Quelldateien.GetMatchingList("schuelerleistungsdaten", IStudents, Klassen);
-        var schBasisds = Quelldateien.GetMatchingList("schuelerbasisdaten", IStudents, Klassen);
-        if (schLeistus == null) return null;
+        if (art == "" && (stdgroupSs == null || stdgroupSs.Count == 0)) return [];
+        
+        List<dynamic> schLeistus = Quelldateien.GetMatchingList("schuelerleistungsdaten", IStudents, Klassen);
+        if (art == "" && (schLeistus == null || schLeistus.Count == 0)) return [];
+
+        List<dynamic> schBasisds = Quelldateien.GetMatchingList("schuelerbasisdaten", IStudents, Klassen);
+        if (art == "" && (schBasisds == null || schBasisds.Count == 0)) return [];
 
         var records = new List<dynamic>();
+
+        if (art == "Mahnung")
+        {
+            marksPerLs = marksPerLs.Where(rec => 
+            {
+                var dict = (IDictionary<string, object>)rec;
+                return dict["Prüfungsart"].ToString().Contains("Mahnung");
+            }).ToList();       
+
+            // Reduziere die IStudents-Liste basierend auf den gefilterten marksPerLs
+            var x = IStudents.Where(student =>
+                marksPerLs.Any(mark =>
+                {
+                    var dict = (IDictionary<string, object>)mark;
+                    return dict["Name"].ToString().Contains(student.Vorname) &&
+                        dict["Name"].ToString().Contains(student.Nachname) &&
+                        dict["Klasse"].ToString() == student.Klasse;
+                })
+            ).ToList();
+
+            IStudents.Clear();
+            IStudents.AddRange(x);
+        }
 
         foreach (var klasse in IStudents.OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct())
         {
@@ -683,6 +713,8 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
                         string jahrgang = student.GetJahrgang(schBasisds);
                         string note = student.GetNote(jahrgang, marksPerLs, dictExp["subject"].ToString()!);
                         string kursart = GetKursart(jahrgang, fach);
+                        bool mahnung = student.GetMahnung(marksPerLs, dictExp["subject"].ToString()!);
+                       
 
                         // Die Kursart 
                         var kursartBisher = schLeistus
@@ -729,7 +761,16 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
                             record.Jahrgänge = "";
                             record.FehlstdPUNKT = ""; // Fehlzeiten werden über die Abschnittsdaten importiert.
                             record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
-                            records.Add(record);
+                            if (art == "Mahnung")
+                            {
+                                record.Mahnung = "J";
+                                record.Sortierung = "";
+                                record.Mahndatum = DateTime.Now.ToShortDateString();
+                            }
+                            if((mahnung && art == "Mahnung") || art != "Mahnung")
+                            {
+                                records.Add(record);
+                            }
                         }
                         else // Bei Kursunterrichten wird geschaut, ob der Schüler den Kurs belegt hat. 
                         {
@@ -772,7 +813,16 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
                                 record.Jahrgänge = "";
                                 record.FehlstdPUNKT = "";
                                 record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
-                                records.Add(record);
+                                if (art == "Mahnung")
+                                {   
+                                    record.Mahnung = "";
+                                    record.Sortierung = "";
+                                    record.Mahndatum = DateTime.Now.ToShortDateString();
+                                }
+                                if((mahnung && art == "Mahnung") || art != "Mahnung")
+                                {
+                                    records.Add(record);
+                                }
                             }
                         }
                     }
@@ -780,8 +830,8 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
             }
         }
 
-        zielDatei.AddRange(records);
-        return zielDatei;
+        zieldatei.AddRange(records);
+        return zieldatei;
     }
 
     private List<dynamic>? GetUnterrichteMitDiesemFach(string fach, string klasse, List<dynamic>? exportLessons)
@@ -1328,7 +1378,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
             .OrderByDescending(x => int.TryParse(x.IdSchild, out var id) ? id : 0) // IdSchild in int umwandeln, Standardwert 0 bei Fehler
             .FirstOrDefault(); // Gibt den Schüler mit der höchsten IdSchild zurück
                     
-            if(schildStudent.Nachname == "Fischer" && schildStudent.Vorname == "Tobias"){
+            if(schildStudent.Nachname == "Dogani" && schildStudent.Vorname == "Elon"){
                 string a = "a";
             }
 
@@ -1411,7 +1461,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
 
             if(student == null) continue;
 
-            if(student.Nachname == "Fischer"){
+            if(student.Nachname == "Chernivchan"){
                 string a = "a";
             }
 

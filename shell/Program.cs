@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB.exe | https://github.com/stbaeumer/BKB | GPLv3 | 20.03.2025";
+Global.H1 = "BKB-Tool | https://github.com/stbaeumer/BKB | GPLv3 | 21.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();
@@ -188,14 +188,21 @@ static object CreateBkbJsonContent()
 {
     return new
     {
+        ConnectionStringUntis = Global.Verschluesseln(@""),
+        SchipsPasswort = Global.Verschluesseln(""),
+        ZeugnisPasswort = Global.Verschluesseln(""),
+        ZeugnisUrl = Global.Verschluesseln("https://bkb.wiki/notenlisten:start"),
+        SchipsUrl = Global.Verschluesseln("https://bkb.wiki/statistik:schips:start"),
+        SmtpPassword = Global.Verschluesseln(""),
+        PdfKennwort = Global.Verschluesseln(""),
+        SchipsOderZeugnisseOderAnderePdfs = Global.Verschluesseln("1"),
         Global.PfadExportdateien,
         Global.PfadSchilddateien,
         Kalenderfilter = Global.Verschluesseln(""),
         Auswahl = 1,
         Klassen = Global.Verschluesseln("HBG"),
         Vergleich = Global.Verschluesseln("n"),
-        Kennwort = Global.Verschluesseln(""),
-        PdfKennwort = Global.Verschluesseln("Geheim123"),
+        Kennwort = Global.Verschluesseln(""),        
         InputFolder = Global.Verschluesseln(""),
         OutputFolder = Global.Verschluesseln(""),
         Halbjahreszeugnisdatum = Global.Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
@@ -223,13 +230,11 @@ static object CreateBkbJsonContent()
         AktSj = Global.Verschluesseln(""),
         Klasse = Global.Verschluesseln(""),
         MailDomain = Global.Verschluesseln("@students.berufskolleg-borken.de"),
-        ZipKennwort = Global.Verschluesseln("Geheim123"),
-        ConnectionStringUntis = Global.Verschluesseln(""),
+        ZipKennwort = Global.Verschluesseln("Geheim123"),        
         EinstellungenVorgenommen = Global.Verschluesseln("n"),
         SmtpServer = Global.Verschluesseln("smtp.office365.com"),
         SmtpUser = Global.Verschluesseln("webuntis@berufskolleg-borken.de"),
-        SmtpPassword = Global.Verschluesseln(""),
         SmtpPort = Global.Verschluesseln("587"),
-        NetmanMailReceiver = Global.Verschluesseln("thomas.kottenstede@berufskolleg-borken.de")
+        NetmanMailReceiver = Global.Verschluesseln("thomas.kottenstede@berufskolleg-borken.de"),        
     };
 }

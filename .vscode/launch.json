@@ -6,7 +6,7 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/shell/bin/Debug/net8.0/BKB.dll",
+      "program": "${workspaceFolder}/shell/bin/Debug/net8.0/BKB-Tool.dll",
       "args": [],
       "cwd": "${workspaceFolder}/shell",
       "console": "integratedTerminal",
