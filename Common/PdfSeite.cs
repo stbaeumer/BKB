@@ -1,5 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Azure;
+using Microsoft.Extensions.Configuration;
+using PdfSharp.Pdf;
 
 public partial class PdfSeite
 {
@@ -9,6 +11,7 @@ public partial class PdfSeite
     public string Datum { get; set; }
     public int Seite { get; set; }
     public PdfSharp.Pdf.PdfPage Page { get; set; }
+    public Lehrers MailReceiver { get; set; } = new Lehrers();
 
     public PdfSeite(int seite, string inhalt, string dateiName, PdfSharp.Pdf.PdfPage page)
     {
@@ -79,6 +82,7 @@ public partial class PdfSeite
     }
 
     public string Zeugnisdatum { get; set; }
+    public PdfDocument? PdfDocument { get; set; }
 
     public Student SeiteZuStudentZuordnen(Students students)
     {
@@ -132,4 +136,99 @@ public partial class PdfSeite
 
     [GeneratedRegex(@"\b\d{2}\.\d{2}\.\d{4}\b")]
     private static partial Regex MyRegex();
+
+    internal void PdfDocumentEncrypt(string passwort)
+    {        
+            // Verschlüsselung des PDF-Dokuments
+        if (PdfDocument != null)
+        {
+            var securitySettings = PdfDocument.SecuritySettings;
+            securitySettings.UserPassword = passwort;
+            securitySettings.OwnerPassword = passwort;
+            securitySettings.PermitPrint = false; // Drucken deaktivieren
+            securitySettings.PermitModifyDocument = false; // Bearbeiten deaktivieren
+            securitySettings.PermitExtractContent = false; // Inhalt kopieren deaktivieren
+            securitySettings.PermitAnnotations = false; // Anmerkungen deaktivieren
+        }
+    }
+
+    internal void GetMailReceiver(Lehrers lehrers)
+    {
+        foreach (var leh in lehrers)               
+        {
+            if (!string.IsNullOrEmpty(leh.Mail))
+            {
+                if (IstValideEmail(leh.Mail))
+                {
+                    if (Inhalt.ToLower().Contains(leh.Mail.ToLower()))
+                    {
+                        MailReceiver.Add(leh);
+                    }
+                }
+            }
+        }
+    }
+
+    private bool IstValideEmail(string email)
+    {
+        var emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+        return Regex.IsMatch(email, emailRegex);
+    }
+
+    internal void PdfDocumentCreate(string dateiPfad)
+    {
+        // Öffnen des ursprünglichen Dokuments im Import-Modus
+        using (var originalPdf = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Import))
+        {
+            var pdfDocument = new PdfDocument();
+
+            // Importieren der Seite aus dem ursprünglichen Dokument
+            var importedPage = originalPdf.Pages[Seite - 1]; // Seite.PageNumber ist 1-basiert
+            pdfDocument.AddPage(importedPage);
+
+            // Speichere die extrahierte Seite in einer neuen PDF-Datei
+            DateiName = Path.GetFileName(dateiPfad);
+            //pdfDocument.Save(seitePdfName);
+            PdfDocument = pdfDocument;
+        }
+    }
+
+    internal void Mailen(string betreff, IConfiguration configuration)
+{
+    if (Global.SmtpUser == null || Global.SmtpPassword == null || Global.SmtpPort == null || Global.SmtpServer == null || Global.NetmanMailReceiver == null)
+    {
+        Global.Konfig("SmtpUser", configuration, "Mail-Benutzer angeben");
+        Global.Konfig("SmtpPassword", configuration, "Mail-Kennwort eingeben");
+        Global.Konfig("SmtpPort", configuration, "SMTP-Port eingeben");
+        Global.Konfig("SmtpServer", configuration, "SMTP-Server angeben");
+        Global.Konfig("NetmanMailReceiver", configuration, "Wem soll die Netman-Mail geschickt werden?");
+    }
+
+    foreach (var lehrer in MailReceiver)
+    {
+        var receiverEmail = lehrer.Mail;
+        var subject = $"{betreff} {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname}";
+        var body = $@"
+Guten Morgen {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname},
+
+bitte beachten Sie den Anhang.
+
+Viele Grüße aus der Schulverwaltung
+";
+
+        if (PdfDocument != null)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                // Speichern des PDF-Dokuments in den MemoryStream
+                PdfDocument.Save(memoryStream, false);
+                memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang
+
+                // Erstellen und Senden der E-Mail
+                var mail = new Mail();
+                mail.Senden(subject, Global.SmtpUser, body, memoryStream, this.DateiName, receiverEmail);
+            }
+        }
+    }
+}
 }

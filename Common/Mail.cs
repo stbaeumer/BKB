@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using MailKit.Net.Smtp;
 using MimeKit;
 
@@ -52,7 +54,7 @@ public class Mail
             // 3️⃣ Setze den E-Mail-Body auf multipart (Text + Anhang)
             email.Body = multipart;
 
-            using (var smtpClient = new SmtpClient())
+            using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
             {
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
                 smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
@@ -66,6 +68,25 @@ public class Mail
         catch(Exception ex){
             Global.ZeileSchreiben(receiverEmail, "Versand gescheitert.", ConsoleColor.Red,ConsoleColor.Gray);        
             Console.WriteLine("Fehler beim Versand der E-Mail an " + receiverEmail + ": " + ex.Message);
+        }
+    }
+
+    public void Senden(string subject, string sender, string body, Stream attachmentStream, string attachmentName, string receiver)
+    {
+        var mailMessage = new MailMessage(sender, receiver, subject, body);
+        mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
+
+        if(Global.SmtpPassword == null || Global.SmtpPassword.Length <= 3)
+        {
+            Console.WriteLine("Bitte geben Sie das Passwort von " + Global.SmtpUser +" für den E-Mail-Versand ein:");
+            Global.SmtpPassword = Console.ReadLine();
+        }
+
+        using (var smtpClient = new System.Net.Mail.SmtpClient(Global.SmtpServer, Convert.ToInt32(Global.SmtpPort)))
+        {
+            smtpClient.Credentials = new NetworkCredential(Global.SmtpUser, Global.SmtpPassword);
+            smtpClient.EnableSsl = true;
+            smtpClient.Send(mailMessage);
         }
     }
 }

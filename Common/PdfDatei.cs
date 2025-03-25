@@ -1,25 +1,23 @@
 ﻿using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
+using Microsoft.Extensions.Configuration;
+using System.Text.RegularExpressions;
 
 public class PdfDatei
 {
     private PdfDocument _pdfDocument;
 
+    public PdfPages Pages => _pdfDocument.Pages; // Zugriff auf die Seiten des Dokuments
+    public string DateiName { get; set; }
+    public Students Students { get; set; } = new Students();
+    public PdfSeiten Seiten { get; set; } = new PdfSeiten();
+    public string Art { get; set; }
+    public string Datum { get; set; } 
+
     public PdfDatei(string dateiPfad)
     {
         _pdfDocument = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly);
-    }
-
-    public PdfPages Pages => _pdfDocument.Pages; // Zugriff auf die Seiten des Dokuments
-    public string DateiName { get; set; }
-    public Students Students { get; set; }
-    public PdfSeiten Seiten { get; set; }
-    public string Art { get; set; }
-    public string Datum { get; set; }
-
-    public PdfDatei(string dateiName)
-    {
-        DateiName = dateiName;
+        DateiName = dateiPfad;
         Seiten = new PdfSeiten();
         Students = new Students();
     }
@@ -129,10 +127,14 @@ public class PdfDatei
         }
     }
 
-    internal void SeitenEinlesen(string dateiPfad)
+    public PdfDatei(string dateiPfad, Lehrers lehrers)
     {
-        try
+        Global.DisplayHeader(Global.Header.H3, "Dateien einlesen:", Global.Protokollieren.Nein);
+
+        if (dateiPfad != null)
         {
+            var pdfDatei = new PdfDatei(dateiPfad);
+            
             // Öffne die PDF-Datei
             using (var document = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly))
             {
@@ -145,9 +147,15 @@ public class PdfDatei
                 }
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Fehler beim Einlesen der PDF-Datei: {ex.Message}");
-        }
+    }
+
+    
+
+    private PdfSharp.Pdf.PdfPage ConvertToPdfPage(PdfSeite seite)
+    {
+        var pdfPage = new PdfSharp.Pdf.PdfPage();
+        // Kopieren Sie hier die relevanten Inhalte von `PdfSeite` nach `PdfPage`
+        // Beispiel: pdfPage.Contents = seite.Contents;
+        return pdfPage;
     }
 }

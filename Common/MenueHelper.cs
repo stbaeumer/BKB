@@ -1,10 +1,10 @@
 using Common;
 using Microsoft.Extensions.Configuration;
+using PdfSharp.Pdf;
 
 public static class MenueHelper
 {
-    public static Menue Einlesen(Dateien quelldateien, Klassen Klassen, Lehrers lehrers, IConfiguration configuration, Anrechnungen anrechnungen,
-        Raums raums)
+    public static Menue Einlesen(Dateien quelldateien, Klassen Klassen, Lehrers lehrers, IConfiguration configuration, Anrechnungen anrechnungen, Raums raums)
     {
         try
         {
@@ -14,7 +14,17 @@ public static class MenueHelper
             {
                 throw new Exception("Keine Schülerdaten gefunden.");
             }
+
+            if(lehrers.Count == 0)
+            {
+                lehrers = new Lehrers(quelldateien.Notwendige(["lehrkraefte"]));
                     
+                if (lehrers.Count == 0)
+                {
+                    throw new Exception("Keine Lehrerdaten gefunden.");
+                }
+            }
+
             return new Menue(
                 quelldateien,
                 Klassen,
@@ -409,21 +419,28 @@ public static class MenueHelper
                         }
                     ),
                     new Menüeintrag(
-                        "E-Mail-Adressen auf PDF-Seiten suchen und die betreffende Seiten mailen",
+                        "PDF-Seiten nach E-Mail-Adressen von Lehrkräften durchsuchen und die betreffende Seiten mailen",
                         anrechnungen,
                         quelldateien.Notwendige(["lehrkraefte"]),
                         students,
                         Klassen,
                         [
-                            "PDF-Dateien werden eingelesen.",
-                            "Jede Seite wird nach E-Mail-Adressen durchsucht.",
+                            "Die zuletzt bearbeitete PDF-Datei wird eingelesen.",
+                            "Jede Seite der Datei wird nach E-Mail-Adressen durchsucht.",
                             "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt.",
                             "Optional wird verschlüsselt."
                         ],
                         m =>
                         {
-                            lehrers = new Lehrers(m.Quelldateien);                            
-                            new PdfDateien(lehrers, configuration);
+                            var pdfDatei = Directory.GetFiles(Global.PfadExportdateien, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+                            Global.Konfig("PdfKennwort", configuration, "Kennwort für verschlüsselte PDFs angeben");
+                            foreach (PdfSeite seite in (new PdfDatei(pdfDatei, new Lehrers(m.Quelldateien))).Seiten)
+                            {
+                                seite?.GetMailReceiver(lehrers);
+                                seite?.PdfDocumentCreate(pdfDatei);
+                                seite?.PdfDocumentEncrypt(Global.PdfKennwort);                                
+                                seite?.Mailen("Nachricht aus der Schulverwaltung für", configuration);
+                            }
                         }
                     ),
                     new Menüeintrag(
