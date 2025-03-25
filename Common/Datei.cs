@@ -860,7 +860,7 @@ public class Datei : List<dynamic>
         }
         
         var mail = new Mail();
-        mail.Senden(subject,absendername,body,ZipPfad,receiverEmail);
+        mail.Senden(subject,Global.SmtpUser,body,ZipPfad,receiverEmail);
     }
 
     internal void ZeileSchreiben()

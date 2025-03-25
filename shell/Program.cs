@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB-Tool | https://github.com/stbaeumer/BKB | GPLv3 | 21.03.2025";
+Global.H1 = "BKB-Tool | https://github.com/stbaeumer/BKB | GPLv3 | 24.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();
@@ -194,7 +194,7 @@ static object CreateBkbJsonContent()
         ZeugnisUrl = Global.Verschluesseln("https://bkb.wiki/notenlisten:start"),
         SchipsUrl = Global.Verschluesseln("https://bkb.wiki/statistik:schips:start"),
         SmtpPassword = Global.Verschluesseln(""),
-        PdfKennwort = Global.Verschluesseln(""),
+        PdfKennwort = Global.Verschluesseln("Geheim123"),
         SchipsOderZeugnisseOderAnderePdfs = Global.Verschluesseln("1"),
         Global.PfadExportdateien,
         Global.PfadSchilddateien,

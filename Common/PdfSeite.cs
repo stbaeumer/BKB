@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Azure;
 
 public partial class PdfSeite
 {
@@ -7,10 +8,12 @@ public partial class PdfSeite
     public string Inhalt { get; set; }
     public string Datum { get; set; }
     public int Seite { get; set; }
+    public PdfSharp.Pdf.PdfPage Page { get; set; }
 
-    public PdfSeite(int seite, string inhalt, string dateiName)
+    public PdfSeite(int seite, string inhalt, string dateiName, PdfSharp.Pdf.PdfPage page)
     {
         Seite = seite;
+        Page = page;
         Inhalt = inhalt;
         DateiName = dateiName;
     }

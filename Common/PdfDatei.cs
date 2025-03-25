@@ -3,16 +3,24 @@ using PdfSharp.Pdf.IO;
 
 public class PdfDatei
 {
+    private PdfDocument _pdfDocument;
+
+    public PdfDatei(string dateiPfad)
+    {
+        _pdfDocument = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly);
+    }
+
+    public PdfPages Pages => _pdfDocument.Pages; // Zugriff auf die Seiten des Dokuments
     public string DateiName { get; set; }
     public Students Students { get; set; }
-    public PdfSeiten PdfSeiten { get; set; }
+    public PdfSeiten Seiten { get; set; }
     public string Art { get; set; }
     public string Datum { get; set; }
 
     public PdfDatei(string dateiName)
     {
         DateiName = dateiName;
-        PdfSeiten = new PdfSeiten();
+        Seiten = new PdfSeiten();
         Students = new Students();
     }
 
@@ -20,7 +28,7 @@ public class PdfDatei
     {
         Students studentsMitSeiten = new Students();
 
-        foreach (var pdfSeite in PdfSeiten)
+        foreach (var pdfSeite in Seiten)
         {
             // Der passende Student zu dieser Seite wird ermittelt.
             Student student = pdfSeite.SeiteZuStudentZuordnen(students);
@@ -67,11 +75,79 @@ public class PdfDatei
 
         PdfDocument document = PdfReader.Open(DateiName, PdfDocumentOpenMode.Modify);
         
-        foreach (var pdfSeite in PdfSeiten.OrderByDescending(x => x.Seite).Where(x => x.Student != null))
+        foreach (var pdfSeite in Seiten.OrderByDescending(x => x.Seite).Where(x => x.Student != null))
         {
             document.Pages.RemoveAt(pdfSeite.Seite - 1);
         }
 
         document.Save(DateiName);
+    }
+
+    public void Einlesen(string dateiPfad)
+    {
+        try
+        {
+            // Öffne die PDF-Datei
+            using (var document = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly))
+            {
+                // Iteriere durch alle Seiten der PDF-Datei
+                for (int i = 0; i < document.PageCount; i++)
+                {
+                    var page = document.Pages[i];
+                    var inhalt = ExtrahiereTextAusSeite(page, dateiPfad); // Implementieren Sie diese Methode, um den Text zu extrahieren
+                    Seiten.Add(new PdfSeite(i + 1, inhalt, null, page));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Einlesen der PDF-Datei: {ex.Message}");
+        }
+    }
+
+    private string ExtrahiereTextAusSeite(PdfSharp.Pdf.PdfPage page, string dateiPfad)
+    {
+        // Da PdfSharp keine Textextraktion unterstützt, verwenden wir PdfPig
+        using (var pdfDocument = UglyToad.PdfPig.PdfDocument.Open(dateiPfad))
+        {
+            // Bestimme die Seitennummer durch Iteration
+            int pageIndex = 0;
+            foreach (var pdfPage in page.Owner.Pages)
+            {
+                pageIndex++;
+                if (pdfPage == page)
+                {
+                    break;
+                }
+            }
+
+            // Hole die entsprechende Seite basierend auf der Seitennummer
+            var pdfPigPage = pdfDocument.GetPage(pageIndex);
+
+            // Extrahiere den gesamten Text der Seite
+            return pdfPigPage.Text;
+        }
+    }
+
+    internal void SeitenEinlesen(string dateiPfad)
+    {
+        try
+        {
+            // Öffne die PDF-Datei
+            using (var document = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly))
+            {
+                // Iteriere durch alle Seiten der PDF-Datei
+                for (int i = 0; i < document.PageCount; i++)
+                {
+                    var page = document.Pages[i];
+                    var inhalt = ExtrahiereTextAusSeite(page, dateiPfad); // Implementieren Sie diese Methode, um den Text zu extrahieren
+                    Seiten.Add(new PdfSeite(i + 1, inhalt, null, page));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Einlesen der PDF-Datei: {ex.Message}");
+        }
     }
 }

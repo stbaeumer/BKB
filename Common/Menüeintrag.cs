@@ -624,7 +624,7 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
         return null;
     }
 
-    public Datei Leistungsdaten(string zieldateiname, string art = "")
+    public Datei Leistungsdaten(string zieldateiname, IConfiguration configuration, string art = "")
     {
         var zieldatei = new Datei(zieldateiname);
         
@@ -632,7 +632,7 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
         {
             IStudents = Students;
         }
-        
+
         var marksPerLs = Quelldateien.GetMatchingList("marksperlesson", IStudents, Klassen);
         if (marksPerLs == null || marksPerLs.Count == 0) return [];
 
@@ -649,6 +649,8 @@ if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
         if (art == "" && (schBasisds == null || schBasisds.Count == 0)) return [];
 
         var records = new List<dynamic>();
+
+        Global.Konfig("Abschnitt", configuration, "Abschnitt eingeben.");
 
         if (art == "Mahnung")
         {

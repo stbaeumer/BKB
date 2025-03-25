@@ -5,6 +5,8 @@ using UglyToad.PdfPig.Content;
 public class PdfSeiten : List<PdfSeite>
 {
     public string QuellDateiName { get; set; }
+    
+    public List<PdfSeite> Seiten { get; private set; } = new List<PdfSeite>();
 
     public void ZwischenseitenZuordnen()
     {

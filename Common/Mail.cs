@@ -21,7 +21,7 @@ public class Mail
             string senderPassword = Global.SmtpPassword;
 
             var email = new MimeMessage();
-            //email.From.Add(new MailboxAddress(absendername, senderEmail));
+            email.From.Add(new MailboxAddress(Global.SmtpUser, senderEmail));
             email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
             //email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
             

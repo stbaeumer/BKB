@@ -194,7 +194,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen("|", '\0', true, false);
 
                             m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
-                                "SchuelerLeistungsdaten.dat"));
+                                "SchuelerLeistungsdaten.dat"), configuration);
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien,
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
                             m.Zieldatei?.Erstellen("|", '\0', true, false);
@@ -228,7 +228,7 @@ public static class MenueHelper
                         m => m.LuLAnEintragungDerZeugnisnotenErinnern(lehrers)
                     ),
                     new Menüeintrag(
-                        "Mahnungen importieren",
+                        "Mahnungen importieren (Gem. §50(4) SchulG)",
                         anrechnungen,
                         quelldateien.Notwendige(["marksperlesson", "schuelerleistungsdaten", "exportlessons", "studentgroupstudents", "schuelerleistungsdaten", "schuelerbasisdaten"]),
                         students,
@@ -239,7 +239,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {                            
-                            m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadExportdateien ?? "", "SchuelerLeistungsdaten.dat"), "Mahnung");
+                            m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "", "SchuelerLeistungsdaten.dat"), configuration, "Mahnung");
                             m.Zieldatei?.Erstellen("|", '\0', true, false);
                         }
                     ),
@@ -417,12 +417,13 @@ public static class MenueHelper
                         [
                             "PDF-Dateien werden eingelesen.",
                             "Jede Seite wird nach E-Mail-Adressen durchsucht.",
-                            "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt."
+                            "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt.",
+                            "Optional wird verschlüsselt."
                         ],
                         m =>
                         {
-                            lehrers = new Lehrers(m.Quelldateien);
-                            lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien);                            
+                            lehrers = new Lehrers(m.Quelldateien);                            
+                            new PdfDateien(lehrers, configuration);
                         }
                     ),
                     new Menüeintrag(

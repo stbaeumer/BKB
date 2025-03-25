@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using PdfSharp.Pdf.Security;
+using PdfSharp.Pdf;
+using System.Text.RegularExpressions; // Add this directive for PdfDocument
 
 public class PdfDateien : List<PdfDatei>
 {
@@ -18,7 +20,7 @@ public class PdfDateien : List<PdfDatei>
         foreach (string dateiName in Directory.GetFiles(Global.InputFolder, "*.pdf"))
         {
             var pdfDatei = new PdfDatei(dateiName);
-            pdfDatei.PdfSeiten.Read(dateiName);
+            pdfDatei.Seiten.Read(dateiName);
             pdfDatei.Students = pdfDatei.GetStudentsMitSeiten(students);
             
             foreach (var student in pdfDatei.Students)
@@ -33,7 +35,69 @@ public class PdfDateien : List<PdfDatei>
                 pdfDatei.SeitenAusQuelldateienLöschen();
         }
     }
-    
+
+    public PdfDateien(Lehrers lehrers, IConfiguration configuration)
+    {
+        Global.DisplayHeader(Global.Header.H3, "Dateien einlesen:", Global.Protokollieren.Nein);
+                
+        var dateiPfad = Directory.GetFiles(Global.PfadExportdateien, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+
+        if (dateiPfad != null)
+        {
+            var pdfDatei = new PdfDatei(dateiPfad);
+            
+            pdfDatei.SeitenEinlesen(dateiPfad);
+
+            foreach (var seite in pdfDatei.Seiten)
+            {   
+                if (seite.Inhalt == null)
+                {
+                    continue;
+                }
+
+                foreach (var leh in lehrers)               
+                {
+                    if(!string.IsNullOrEmpty(leh.Mail))
+                    {
+                        if(IstValideEmail(leh.Mail))
+                        {
+                            if(seite.Inhalt.ToLower().Contains(leh.Mail.ToLower()))
+                            {
+                                var mail = new Mail();
+                                var seitePdf = new PdfDocument();
+
+                                // Extrahiere die Seite mit der Seitenzahl `s`
+                                var pdfPage = pdfDatei.Pages[seite.Seite - 1]; // Seitenzahl ist 1-basiert, daher -1
+                                seitePdf.AddPage(pdfPage);
+
+                                // Speichere die extrahierte Seite in einer neuen PDF-Datei
+                                var seitePdfName = Path.Combine(Global.PfadExportdateien, Path.GetFileNameWithoutExtension(dateiPfad) + "-" + leh.Kürzel + ".pdf");
+                                seitePdf.Save(seitePdfName);
+
+                                // Sende die extrahierte Seite per E-Mail
+                                mail.Senden("Betreff: PDF-Seite", Global.SmtpUser, "Hier ist die angeforderte Seite.", seitePdfName, leh.Mail);
+                            }                            
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private bool IstValideEmail(string email)
+    {
+        var emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+        return Regex.IsMatch(email, emailRegex);
+    }
+
+    private PdfSharp.Pdf.PdfPage ConvertToPdfPage(PdfSeite seite)
+{
+    var pdfPage = new PdfSharp.Pdf.PdfPage();
+    // Kopieren Sie hier die relevanten Inhalte von `PdfSeite` nach `PdfPage`
+    // Beispiel: pdfPage.Contents = seite.Contents;
+    return pdfPage;
+}
+
     public void KennwortSetzen(IConfiguration configuration)
     {
         try
