@@ -38,7 +38,7 @@ Global.DefaultBackground = ConsoleColor.White;
 Console.ForegroundColor = ConsoleColor.Black;
 Console.Clear();
 
-Global.H1 = "BKB-Tool | https://github.com/stbaeumer/BKB | GPLv3 | 24.03.2025";
+Global.H1 = "BKB-Tool | https://github.com/stbaeumer/BKB | GPLv3 | 26.03.2025";
 Global.User = Environment.UserName;
 
 Global.CodeSpace = Global.RunningInCodeSpace();
@@ -235,6 +235,8 @@ static object CreateBkbJsonContent()
         SmtpServer = Global.Verschluesseln("smtp.office365.com"),
         SmtpUser = Global.Verschluesseln("webuntis@berufskolleg-borken.de"),
         SmtpPort = Global.Verschluesseln("587"),
-        NetmanMailReceiver = Global.Verschluesseln("thomas.kottenstede@berufskolleg-borken.de"),        
+        NetmanMailReceiver = Global.Verschluesseln("stefan.baeumer@berufskolleg-borken.de"),        
+        Betreff = Global.Verschluesseln("Betreff"),
+        Body = Global.Verschluesseln("Guten Morgen [Lehrer],\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
     };
 }

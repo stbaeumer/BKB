@@ -193,7 +193,7 @@ public partial class PdfSeite
         }
     }
 
-    internal void Mailen(string betreff, IConfiguration configuration)
+    internal void Mailen(string betreff, string body, IConfiguration configuration)
 {
     if (Global.SmtpUser == null || Global.SmtpPassword == null || Global.SmtpPort == null || Global.SmtpServer == null || Global.NetmanMailReceiver == null)
     {
@@ -205,17 +205,12 @@ public partial class PdfSeite
     }
 
     foreach (var lehrer in MailReceiver)
-    {
+    {        
         var receiverEmail = lehrer.Mail;
-        var subject = $"{betreff} {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname}";
-        var body = $@"
-Guten Morgen {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname},
+        var subject = $"{betreff} {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname} ({lehrer.Kürzel})";        
 
-bitte beachten Sie den Anhang.
-
-Viele Grüße aus der Schulverwaltung
-";
-
+        body = body.Replace("[Lehrer]", $"{lehrer.Titel} {lehrer.Vorname} {lehrer.Nachname} ({lehrer.Kürzel})");
+        body = body.Replace("\\n", Environment.NewLine);
         if (PdfDocument != null)
         {
             using (var memoryStream = new MemoryStream())
@@ -229,6 +224,7 @@ Viele Grüße aus der Schulverwaltung
                 mail.Senden(subject, Global.SmtpUser, body, memoryStream, this.DateiName, receiverEmail);
             }
         }
+        Global.ZeileSchreiben(receiverEmail, "gesendet", ConsoleColor.Green, ConsoleColor.White);
     }
 }
 }

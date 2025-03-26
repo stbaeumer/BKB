@@ -433,13 +433,16 @@ public static class MenueHelper
                         m =>
                         {
                             var pdfDatei = Directory.GetFiles(Global.PfadExportdateien, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
-                            Global.Konfig("PdfKennwort", configuration, "Kennwort für verschlüsselte PDFs angeben");
+                            Global.ZeileSchreiben("Die neueste PDF-Datei wird versendet:", pdfDatei, ConsoleColor.White, ConsoleColor.Black);
+                            Global.Konfig("PdfKennwort", configuration, "Kennwort für das verschlüsseln von PDFs angeben");
+                            Global.Konfig("Betreff", configuration, "Betreff angeben. Der Betreff wird um das Lehrerkürzel ergänzt)");
+                            Global.Konfig("Body", configuration, @"Body angeben (\n wird durch Zeilenumbruch ersetzt; [Lehrer] wird durch Lehrername ersetzt)");
                             foreach (PdfSeite seite in (new PdfDatei(pdfDatei, new Lehrers(m.Quelldateien))).Seiten)
                             {
                                 seite?.GetMailReceiver(lehrers);
                                 seite?.PdfDocumentCreate(pdfDatei);
                                 seite?.PdfDocumentEncrypt(Global.PdfKennwort);                                
-                                seite?.Mailen("Nachricht aus der Schulverwaltung für", configuration);
+                                seite?.Mailen(Global.Betreff, Global.Body, configuration);
                             }
                         }
                     ),

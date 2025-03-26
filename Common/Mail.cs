@@ -76,6 +76,9 @@ public class Mail
         var mailMessage = new MailMessage(sender, receiver, subject, body);
         mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
 
+        // Füge den Absender als CC hinzu
+        mailMessage.CC.Add(sender);
+
         if(Global.SmtpPassword == null || Global.SmtpPassword.Length <= 3)
         {
             Console.WriteLine("Bitte geben Sie das Passwort von " + Global.SmtpUser +" für den E-Mail-Versand ein:");

@@ -1463,7 +1463,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
 
             if(student == null) continue;
 
-            if(student.Nachname == "Chernivchan"){
+            if(student.Nachname == "Bude" && student.Vorname == "Nico"){
                 string a = "a";
             }
 

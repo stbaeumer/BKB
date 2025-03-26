@@ -34,8 +34,7 @@ public static class Global
     public static string? ZeugnisUrl { get; set; }
     public static string? SchipsUrl { get; set; }
     public static string? SchipsOderZeugnisseOderAnderePdfs { get; set; }
-
-
+    public static string Betreff { get; set; }
 
 
 
@@ -102,6 +101,7 @@ public static string? SmtpUser { get; set; }
     public static Boolean CodeSpace { get; set; }
     public static bool Veraltet { get; internal set; }
     public static ConsoleColor DefaultBackground { get; set; }
+    public static string Body { get; internal set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
