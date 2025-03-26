@@ -1603,11 +1603,10 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                 record.Passwort = student.Nachname.Substring(0,1).ToUpper() + student.Geburtsdatum;
                 record.Klasse = student.Klasse;
                 record.Klassenleitung = klassenleitung;
-                
-                // todo:
-                // In Netman werden die Schüler erst 6 Wochen nach Abschluss ausgebucht.
-                if(true)
-                {
+                                
+                // Aktive SuS oder Schüler mit Abschluss, der noch keine 42 Tage zurückliegt.
+                if(new List<string>() { "2", "6" }.Contains(student.Status) || (student.Status == "8" && student.Entlassdatum != null && DateTime.TryParseExact(student.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime entlassdatum) && entlassdatum.AddDays(42) >= DateTime.Now))
+                {                                
                     zieldatei.Add(record);
                 }
             }
@@ -1641,7 +1640,11 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                     : student.ExterneIdNummer; // Pflichtfeld
                 record.Jahrgang = student.Jahrgang; // Pflichtfeld 
                 record.ErhältLEERZEICHENBAFög = ""; // Pflichtfeld
-                zieldatei.Add(record);
+                
+                if(new List<string>() { "2", "6" }.Contains(student.Status))
+                {
+                    zieldatei.Add(record);
+                }                
             }
         }
 

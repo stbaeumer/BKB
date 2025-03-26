@@ -1,5 +1,6 @@
 using System.Dynamic;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -382,8 +383,14 @@ public class Datei : List<dynamic>
         return liste;
     }
 
-    public void Erstellen(string delimiter, char quote, bool encoding, bool shouldAllQuote)
+    public void Erstellen(string delimiter, char quote, Encoding encoding, bool shouldAllQuote)
     {
+        /*
+        new UTF8Encoding(true), // UTF-8 mit BOM
+        new UTF8Encoding(false),   // UTF-8 ohne BOM
+        Encoding.Default,          // ANSI        
+        */
+
         if (this.Count == 0)
         {
             return;
@@ -402,7 +409,7 @@ public class Datei : List<dynamic>
 
             if (this != null && this.Any())
             {
-                using var writer = new StreamWriter(AbsoluterPfad, false, new System.Text.UTF8Encoding(encoding));
+                using var writer = new StreamWriter(AbsoluterPfad, false, encoding);
                 using var csv = new CsvWriter(writer, config);
 
                 // Header manuell extrahieren
@@ -899,5 +906,28 @@ public class Datei : List<dynamic>
     internal List<dynamic> FilterOpenPeriod()
     {
         return this;
+    }
+
+    internal void Verschieben(string v)
+    {
+        if (string.IsNullOrEmpty(AbsoluterPfad) || !File.Exists(AbsoluterPfad))
+        {
+            Console.WriteLine("Die Datei existiert nicht oder der Pfad ist ungültig.");
+            return;
+        }
+
+        try
+        {                 
+            var zielPfad = Path.Combine(v, Path.GetFileName(AbsoluterPfad));      
+            
+            // Verschiebe die Datei
+            File.Move(AbsoluterPfad, zielPfad);                        
+            Global.ZeileSchreiben(zielPfad, "verschoben", ConsoleColor.Green, ConsoleColor.White);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Verschieben der Datei: {ex.Message}");
+        }
+
     }
 }

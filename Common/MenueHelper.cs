@@ -1,3 +1,4 @@
+using System.Text;
 using Common;
 using Microsoft.Extensions.Configuration;
 using PdfSharp.Pdf;
@@ -49,7 +50,7 @@ public static class MenueHelper
                             m.Zieldatei = m.KlassenErstellen(Path.Combine(Global.PfadSchilddateien ?? "", @"Klassen.dat"));
                             if (!m.Zieldatei.Any()) return;
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, ["InternBez"], ["SonstigeBez", "Folgeklasse"]);
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                     ),
                     new Menüeintrag(
@@ -70,7 +71,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', false, false);                     
+                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false);                    
                         }
                     ),
                     new Menüeintrag(
@@ -91,14 +92,14 @@ public static class MenueHelper
                         m =>
                         {                      
                             m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
                             m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
                             m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", Global.NetmanMailReceiver ?? "", configuration);
 
                             m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', false, false);
+                            m.Zieldatei?.Erstellen(";", '\'', Encoding.Default, false);
                             m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
-                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad ?? ""), "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad ?? ""), Global.NetmanMailReceiver  ?? "", configuration);
+                            m.Zieldatei?.Verschieben(@"\\fs01\Littera\Atlantis Import Daten");
                         }
                     ),
                     new Menüeintrag(
@@ -121,7 +122,7 @@ public static class MenueHelper
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
                             {
                                 m.Zieldatei = m.Kalender2Wiki(kalender, Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender));
-                                m.Zieldatei.Erstellen(",", '\"', false, true);    
+                                m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);    
                             }
                         }
                     ),
@@ -157,12 +158,12 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.GetGruppen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
-                            m.Zieldatei.Erstellen(",", '\"', false, true);
+                            m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);
                             m.Zieldatei = anrechnungen.Anlegen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
-                            m.Zieldatei.Erstellen(",", '\"', false, true);
+                            m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);
 
                             m.Zieldatei = m.GetLehrer(Path.Combine(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
-                            m.Zieldatei.Erstellen(",", '\'', false, false);
+                            m.Zieldatei.Erstellen(",", '\'', new UTF8Encoding(false), false);
 
                             m.Zieldatei = m.Praktikanten(
                                 [
@@ -170,15 +171,15 @@ public static class MenueHelper
                                     "IFK,1"
                                 ],
                                 Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
 
                             m.Zieldatei = m.KlassenAnlegen(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
 
                             m.Schulpflichtüberwachung();
 
                             m.Zieldatei = m.GetFaecher(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', false, false);
+                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
                         }
                     ),
                     new Menüeintrag(
@@ -201,21 +202,21 @@ public static class MenueHelper
                                 "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien,
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "",
                                 "SchuelerLeistungsdaten.dat"), configuration);
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien,
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             m.Zieldatei = m.Faecher(Path.Combine(Global.PfadSchilddateien ?? "", "Faecher.dat"));
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             m.Zieldatei = m.Kurse(Path.Combine(Global.PfadSchilddateien ?? "", "Kurse.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, ["KursBez"],
                                 ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine("  Schritt #1: Import nach SchILD durchführen.");
@@ -250,7 +251,7 @@ public static class MenueHelper
                         m =>
                         {                            
                             m.Zieldatei = m.Leistungsdaten(Path.Combine(Global.PfadSchilddateien ?? "", "SchuelerLeistungsdaten.dat"), configuration, "Mahnung");
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                     ),
                     new Menüeintrag(
@@ -345,7 +346,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.Teilleistungen(@"ImportNachSchild\SchuelerTeilleistungen.dat");
-                            m.Zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                     ),
                     new Menüeintrag(
@@ -395,10 +396,10 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat", configuration);
-                            m.Zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             m.Zieldatei = m.LeistungsdatenAlt(@"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
-                            m.Zieldatei?.Erstellen("|", '\0', true, false);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                     ),
                     new Menüeintrag(
@@ -480,7 +481,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.Zusatzdaten(@"ImportNachSchild/SchuelerZusatzdaten.dat");
-                            m.Zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                         ),
                     new Menüeintrag(
@@ -493,7 +494,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.Zieldatei = m.Basisdaten("ImportNachSchild/SchuelerBasisdaten.dat");
-                            m.Zieldatei.Erstellen("|", '\0', true, false);
+                            m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         }
                     )
                 ]
