@@ -97,8 +97,7 @@ public static class MenueHelper
                             m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", Global.NetmanMailReceiver ?? "", configuration);
 
                             m.Zieldatei = m.WebuntisOderNetmanCsv(Path.Combine(Global.PfadExportdateien ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', Encoding.Default, false);
-                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
+                            m.Zieldatei?.Erstellen(";", '\'', Encoding.Default, false);                            
                             m.Zieldatei?.Verschieben(@"\\fs01\Littera\Atlantis Import Daten");
                         }
                     ),
@@ -430,6 +429,34 @@ public static class MenueHelper
                             "Jede Seite der Datei wird nach E-Mail-Adressen durchsucht.",
                             "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt.",
                             "Optional wird verschlüsselt."
+                        ],
+                        m =>
+                        {
+                            var pdfDatei = Directory.GetFiles(Global.PfadExportdateien, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+                            Global.ZeileSchreiben("Die neueste PDF-Datei wird versendet:", pdfDatei, ConsoleColor.White, ConsoleColor.Black);
+                            Global.Konfig("PdfKennwort", configuration, "Kennwort für das verschlüsseln von PDFs angeben");
+                            Global.Konfig("Betreff", configuration, "Betreff angeben. Der Betreff wird um das Lehrerkürzel ergänzt)");
+                            Global.Konfig("Body", configuration, @"Body angeben (\n wird durch Zeilenumbruch ersetzt; [Lehrer] wird durch Lehrername ersetzt)");
+                            foreach (PdfSeite seite in (new PdfDatei(pdfDatei, new Lehrers(m.Quelldateien))).Seiten)
+                            {
+                                seite?.GetMailReceiver(lehrers);
+                                seite?.PdfDocumentCreate(pdfDatei);
+                                seite?.PdfDocumentEncrypt(Global.PdfKennwort);                                
+                                seite?.Mailen(Global.Betreff, Global.Body, configuration);
+                            }
+                        }
+                    ),
+                    new Menüeintrag(
+                        "Massen-Mail senden",
+                        anrechnungen,
+                        quelldateien.Notwendige(["lehrkraefte"]),
+                        students,
+                        Klassen,
+                        [
+                            "Die Datei mails.csv muss im Ordner " + Global.PfadExportdateien + " liegen.",
+                            "Es werden immer genau 49 Empfänger in BCC angeschrieben.",
+                            "Als Inhalt wird das Bild campusfest.jpg angehängt.",
+                            "Die bereits angeschriebenen Empfänger werden in der Datei mails.csv markiert und nicht wieder ausgewählt."
                         ],
                         m =>
                         {

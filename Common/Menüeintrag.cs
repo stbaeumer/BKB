@@ -1587,7 +1587,10 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                 record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
                 record.O365Identität = student.MailSchulisch;
                 record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
-                zieldatei.Add(record);
+                if(student.Status == "2" || student.Status == "6")
+                {
+                    zieldatei.Add(record);
+                }
             }
             else if (Path.GetFileName(zieldateiname).ToLower().Contains("netman"))
             {
@@ -1605,7 +1608,7 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
                 record.Klassenleitung = klassenleitung;
                                 
                 // Aktive SuS oder Schüler mit Abschluss, der noch keine 42 Tage zurückliegt.
-                if(new List<string>() { "2", "6" }.Contains(student.Status) || (student.Status == "8" && student.Entlassdatum != null && DateTime.TryParseExact(student.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime entlassdatum) && entlassdatum.AddDays(42) >= DateTime.Now))
+                if(new List<string>() { "2", "6" }.Contains(student.Status) || (student.Status == "8" && sz?["Entlassdatum"].ToString() != null && DateTime.TryParseExact(sz?["Entlassdatum"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime entlassdatum) && entlassdatum.AddDays(42) >= DateTime.Now))
                 {                                
                     zieldatei.Add(record);
                 }
@@ -1739,8 +1742,11 @@ var documentsFolderPath = Path.Combine(Environment.GetFolderPath(Environment.Spe
             record.Vorname = dictBasisdaten["Vorname"].ToString();
             record.Mail = dictBasisdaten["MailSchulisch"].ToString();
             record.Klasse = dictBasisdaten["Klasse"].ToString();
-            zieldatei.Add(record);
-
+            
+            if (dictBasisdaten["Status"].ToString() == "2"|| dictBasisdaten["Status"].ToString() == "6")
+            {             
+                zieldatei.Add(record);
+            }
 
             // "Lfd Nr";"Klasse: Schuljahr";"Klasse";"Schüler: Nachname";"Schüler: Vorname";"Schüler: Ort";"Schüler: Plz";"Schüler: Straße";"Schüler: Geschlecht";"Schüler: Telefon";"Schüler: Barcode";"Schüler: Geburtsdatum";"Klasse: Klassenleiter";"Betrieb: Briefadresse";
 
